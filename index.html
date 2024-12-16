@@ -25,7 +25,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--background);
             color: var(--text);
-            line-height: 1.5;
+            min-height: 100vh;
         }
 
         .header {
@@ -34,36 +34,88 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border);
+            background: var(--background);
             position: sticky;
             top: 0;
-            background: var(--background);
             z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--secondary);
+            color: var(--text);
+            font-size: 16px;
+        }
+
+        .nav-container {
+            padding: 15px 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            border-bottom: 1px solid var(--border);
+            background: var(--background);
+            position: sticky;
+            top: 64px;
+            z-index: 99;
+        }
+
+        .nav-button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            border-radius: 20px;
+            border: none;
+            background: var(--secondary);
+            color: var(--text);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .nav-button.active {
+            background: var(--primary);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
         }
 
         .article-grid {
             display: grid;
-            gap: 24px;
-            padding: 24px;
+            gap: 20px;
             grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            max-width: 1600px;
-            margin: 0 auto;
         }
 
         .article-card {
             background: var(--secondary);
-            border-radius: 16px;
+            border-radius: 12px;
             overflow: hidden;
             transition: transform 0.2s;
+            cursor: pointer;
             position: relative;
-        }
-
-        .article-card:hover {
-            transform: translateY(-4px);
         }
 
         .article-image-container {
             position: relative;
-            padding-top: 56.25%; /* 16:9 aspect ratio */
+            padding-top: 56.25%;
             background: var(--accent);
             overflow: hidden;
         }
@@ -75,11 +127,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s;
-        }
-
-        .article-card:hover .article-image {
-            transform: scale(1.05);
         }
 
         .article-content {
@@ -87,108 +134,103 @@
         }
 
         .article-title {
-            font-size: 1.25rem;
-            margin-bottom: 12px;
+            font-size: 18px;
             line-height: 1.4;
+            margin-bottom: 10px;
         }
 
         .article-meta {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 14px;
         }
 
-        .share-button {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: rgba(0, 0, 0, 0.7);
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.2s;
-            color: white;
-        }
-
-        .article-card:hover .share-button {
-            opacity: 1;
-        }
-
-        .share-menu {
-            position: absolute;
-            top: 52px;
-            right: 12px;
+        .trending-sidebar {
             background: var(--secondary);
-            border-radius: 8px;
-            padding: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            display: none;
-            z-index: 10;
+            border-radius: 12px;
+            padding: 20px;
+            position: sticky;
+            top: 140px;
         }
 
-        .share-menu.active {
-            display: block;
+        .trending-title {
+            font-size: 20px;
+            margin-bottom: 15px;
         }
 
-        .share-option {
-            padding: 8px 16px;
+        .trending-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
             cursor: pointer;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .share-option:hover {
-            background: var(--accent);
-            border-radius: 4px;
+        .trending-item:last-child {
+            border-bottom: none;
         }
 
-        .copy-notification {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            opacity: 0;
-            transition: opacity 0.3s;
+        .trending-keyword {
+            font-weight: 600;
+            margin-bottom: 4px;
         }
 
-        .copy-notification.active {
-            opacity: 1;
+        .trending-meta {
+            font-size: 14px;
+            color: var(--text-secondary);
         }
 
-        @media (max-width: 768px) {
-            .article-grid {
+        @media (max-width: 1200px) {
+            .content {
                 grid-template-columns: 1fr;
-                padding: 16px;
             }
 
-            .share-button {
-                opacity: 1;
+            .trending-sidebar {
+                display: none;
+            }
+
+            .article-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .search-container {
+                margin: 0 10px;
+            }
+
+            .article-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header content remains the same -->
+    <header class="header">
+        <a href="/" class="logo">SPILL</a>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search articles..." id="searchInput">
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    </header>
 
-    <div class="article-grid" id="articleGrid"></div>
+    <nav class="nav-container">
+        <button class="nav-button active" onclick="showFeed('all')">All News</button>
+        <button class="nav-button" onclick="showFeed('movies')">Movies & TV</button>
+        <button class="nav-button" onclick="showFeed('music')">Music</button>
+        <button class="nav-button" onclick="showFeed('money')">Money</button>
+        <button class="nav-button" onclick="showFeed('popculture')">Pop Culture</button>
+        <button class="nav-button" onclick="showFeed('sports')">Sports</button>
+        <button class="nav-button" onclick="showFeed('tech')">Technology & AI</button>
+    </nav>
 
-    <div class="copy-notification" id="copyNotification">
-        Link copied to clipboard!
-    </div>
+    <main class="content">
+        <div class="article-grid" id="articleGrid"></div>
+        
+        <aside class="trending-sidebar">
+            <h2 class="trending-title">Trending Topics</h2>
+            <div id="trendingContainer"></div>
+        </aside>
+    </main>
 
     <script src="app.js"></script>
 </body>
