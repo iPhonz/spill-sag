@@ -1,7 +1,13 @@
-// Initialize trend analyzer
-const trendAnalyzer = new TrendAnalyzer();
+// State management
+const state = {
+    articles: [],
+    currentFeed: 'all',
+    searchQuery: '',
+    loading: false,
+    error: null
+};
 
-// RSS Feed URLs
+// Feed URLs
 const feeds = {
     movies: 'https://rss.app/feeds/v1.1/_6QzByBP0Y0E9bL0O.json',
     music: 'https://rss.app/feeds/v1.1/_p1hbSzosU9dbDQWx.json',
@@ -11,32 +17,15 @@ const feeds = {
     tech: 'https://rss.app/feeds/v1.1/_GNEAg9D5CvYRIxAQ.json'
 };
 
-// State management
-let allArticles = [];
-let currentFeed = 'all';
-let searchQuery = '';
-
-// Debug logging
-const debug = true;
-function log(message, data) {
-    if (debug) {
-        console.log(`[DEBUG] ${message}:`, data);
-    }
-}
-
-// Fetch feed data with error handling
-async function fetchFeed(url) {
+// Fetch single feed
+async function fetchFeed(topic, url) {
     try {
-        log('Fetching feed', url);
         const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        log('Feed data received', { url, itemCount: data.items?.length });
-        return data.items || [];
+        return (data.items || []).map(item => ({ ...item, topic }));
     } catch (error) {
-        console.error(`Error fetching feed: ${url}`, error);
+        console.error(`Error fetching ${topic} feed:`, error);
         throw error;
     }
 }
@@ -44,71 +33,56 @@ async function fetchFeed(url) {
 // Load all feeds
 async function loadFeeds() {
     const articleGrid = document.getElementById('articleGrid');
-    if (!articleGrid) {
-        console.error('Article grid element not found');
-        return;
-    }
+    if (!articleGrid) return;
 
+    state.loading = true;
+    state.error = null;
     articleGrid.innerHTML = '<div class="loading">Loading articles...</div>';
-    log('Starting feed load');
 
     try {
-        const feedPromises = Object.entries(feeds).map(async ([topic, url]) => {
-            const articles = await fetchFeed(url);
-            return articles.map(article => ({ ...article, topic }));
-        });
-
+        const feedPromises = Object.entries(feeds).map(([topic, url]) => fetchFeed(topic, url));
         const results = await Promise.all(feedPromises);
-        allArticles = results.flat();
-
-        log('All feeds loaded', { articleCount: allArticles.length });
-
-        if (allArticles.length === 0) {
-            throw new Error('No articles found');
-        }
-
+        state.articles = results.flat();
         updateDisplay();
         updateTrending();
     } catch (error) {
-        console.error('Error loading feeds:', error);
+        state.error = error.message;
         articleGrid.innerHTML = `
             <div class="error">
                 Failed to load articles: ${error.message}
-                <button onclick="loadFeeds()" class="retry-button">Retry</button>
+                <button class="retry-button" onclick="loadFeeds()">Retry</button>
             </div>
         `;
+    } finally {
+        state.loading = false;
     }
 }
 
 // Update article display
 function updateDisplay() {
     const articleGrid = document.getElementById('articleGrid');
-    if (!articleGrid) {
-        console.error('Article grid element not found');
-        return;
+    if (!articleGrid) return;
+
+    let articles = [...state.articles];
+
+    // Apply filters
+    if (state.currentFeed !== 'all') {
+        articles = articles.filter(article => article.topic === state.currentFeed);
     }
 
-    let articles = [...allArticles];
-    log('Updating display', { totalArticles: articles.length, currentFeed, searchQuery });
-
-    if (currentFeed !== 'all') {
-        articles = articles.filter(article => article.topic === currentFeed);
-        log('Filtered by feed', { filteredCount: articles.length });
-    }
-
-    if (searchQuery) {
-        const query = searchQuery.toLowerCase();
+    if (state.searchQuery) {
+        const query = state.searchQuery.toLowerCase();
         articles = articles.filter(article => 
             article.title.toLowerCase().includes(query) ||
             (article.description || '').toLowerCase().includes(query)
         );
-        log('Filtered by search', { filteredCount: articles.length });
     }
 
+    // Sort by date
     articles.sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
 
     if (articles.length === 0) {
-        articleGrid.innerHTML = '<div class="no-results">No articles found</div>';
+        articleGrid.innerHTML = '<div class="error">No articles found</div>';
         return;
     }
 
@@ -131,72 +105,90 @@ function updateDisplay() {
             </div>
         </article>
     `).join('');
-
-    log('Display updated', { renderedArticles: articles.length });
-}
-
-// Switch feed category
-function switchFeed(feed) {
-    log('Switching feed', { from: currentFeed, to: feed });
-    currentFeed = feed;
-    
-    // Update navigation buttons
-    document.querySelectorAll('.nav-button').forEach(button => {
-        const feedId = button.dataset.feed;
-        button.classList.toggle('active', feedId === feed);
-    });
-
-    updateDisplay();
 }
 
 // Update trending section
 function updateTrending() {
     const trendingContainer = document.getElementById('trendingContainer');
-    if (!trendingContainer) {
-        console.error('Trending container not found');
-        return;
-    }
+    if (!trendingContainer || !state.articles.length) return;
 
-    log('Analyzing trends');
-    const trends = trendAnalyzer.analyzeTrends(allArticles);
-    log('Trends analyzed', { trendCount: trends.length });
+    try {
+        const trends = trendAnalyzer.analyzeTrends(state.articles);
 
-    if (trends.length === 0) {
-        trendingContainer.innerHTML = '<div class="error">No trends found</div>';
-        return;
-    }
+        if (!trends.length) {
+            trendingContainer.innerHTML = '<div class="error">No trends found</div>';
+            return;
+        }
 
-    trendingContainer.innerHTML = trends.map(trend => {
-        const topicBadges = trend.topics.map(topic => 
-            `<span class="topic-badge">${topic}</span>`
-        ).join('');
+        trendingContainer.innerHTML = trends.map(trend => {
+            const topicBadges = trend.topics.map(topic => 
+                `<span class="topic-badge">${topic}</span>`
+            ).join('');
 
-        const typeIcon = getTypeIcon(trend.type);
+            const typeIcon = getTypeIcon(trend.type);
 
-        return `
-            <div class="trending-item" onclick="searchKeyword('${trend.entity}')">
-                <div class="trending-header">
-                    <span class="trend-type">${typeIcon}</span>
-                    <div class="trending-keyword">${trend.entity}</div>
+            return `
+                <div class="trending-item" onclick="setSearch('${trend.entity}')">
+                    <div class="trending-header">
+                        <span class="trend-type">${typeIcon}</span>
+                        <div class="trending-keyword">${trend.entity}</div>
+                    </div>
+                    <div class="trending-meta">
+                        <span>${trend.mentions} mentions</span>
+                        <div class="topic-badges">${topicBadges}</div>
+                    </div>
                 </div>
-                <div class="trending-meta">
-                    <span>${trend.mentions} mentions</span>
-                    <div class="topic-badges">${topicBadges}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error updating trends:', error);
+        trendingContainer.innerHTML = '<div class="error">Error analyzing trends</div>';
+    }
 }
 
-// Event listeners
-document.addEventListener('DOMContentLoaded', () => {
-    log('Initializing app');
+// Get icon for trend type
+function getTypeIcon(type) {
+    const icons = {
+        name: '👤',
+        organization: '🏢',
+        brand: '™️',
+        team: '🏆',
+        entertainment: '🎭',
+        tech: '💻',
+        phrase: '📰'
+    };
+    return icons[type] || '📌';
+}
+
+// Set search query
+function setSearch(query) {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.value = query;
+        state.searchQuery = query;
+        updateDisplay();
+    }
+}
+
+// Switch feed
+function switchFeed(feed) {
+    state.currentFeed = feed;
     
-    // Set up search
+    // Update navigation buttons
+    document.querySelectorAll('.nav-button').forEach(button => {
+        button.classList.toggle('active', button.dataset.feed === feed);
+    });
+
+    updateDisplay();
+}
+
+// Initialize app
+document.addEventListener('DOMContentLoaded', () => {
+    // Set up search input
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value;
+            state.searchQuery = e.target.value;
             updateDisplay();
         });
     }
@@ -205,9 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-button').forEach(button => {
         button.addEventListener('click', () => {
             const feed = button.dataset.feed;
-            if (feed) {
-                switchFeed(feed);
-            }
+            if (feed) switchFeed(feed);
         });
     });
 
@@ -217,41 +207,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Refresh every 5 minutes
     setInterval(loadFeeds, 5 * 60 * 1000);
 });
-
-// Additional styles
-const styles = `
-    .retry-button {
-        margin-left: 1rem;
-        padding: 0.5rem 1rem;
-        background: var(--primary);
-        border: none;
-        border-radius: 4px;
-        color: white;
-        cursor: pointer;
-    }
-
-    .no-results {
-        text-align: center;
-        padding: 2rem;
-        color: var(--text-secondary);
-    }
-
-    .loading {
-        text-align: center;
-        padding: 2rem;
-        color: var(--text-secondary);
-    }
-
-    .error {
-        text-align: center;
-        padding: 1rem;
-        color: #ff4444;
-        background: rgba(255, 0, 0, 0.1);
-        border-radius: 4px;
-        margin: 1rem 0;
-    }
-`;
-
-const styleSheet = document.createElement('style');
-styleSheet.textContent = styles;
-document.head.appendChild(styleSheet);
