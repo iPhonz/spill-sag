@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPILL - Trending Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="nav-bar">
+        <div class="nav-content">
+            <h1>SPILL Trends</h1>
+            <button onclick="toggleTheme()" class="theme-btn">🌙</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="timeframe-selector">
+            <button class="timeframe-btn active" onclick="updateTimeframe('1h')">1 Hour</button>
+            <button class="timeframe-btn" onclick="updateTimeframe('24h')">24 Hours</button>
+            <button class="timeframe-btn" onclick="updateTimeframe('7d')">7 Days</button>
+        </div>
+
+        <div class="trend-visualization">
+            <h2>Top Keywords Overview</h2>
+            <div id="keywordChart" class="chart-container"></div>
+        </div>
+
+        <div class="trend-grid" id="trendGrid">
+            <div class="loading">Analyzing trending keywords...</div>
+        </div>
+    </div>
+    <script src="trending.js"></script>
+</body>
+</html>
