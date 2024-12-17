@@ -7,39 +7,47 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Previous header content... -->
-
-        <nav class="navigation">
-            <div class="nav-content">
-                <button class="nav-button active" data-feed="all">All News</button>
-                <button class="nav-button" data-feed="movies">Movies & TV</button>
-                <button class="nav-button" data-feed="music">Music</button>
-                <button class="nav-button" data-feed="money">Money</button>
-                <button class="nav-button" data-feed="popculture">Pop Culture</button>
-                <button class="nav-button" data-feed="sports">Sports</button>
-                <button class="nav-button" data-feed="tech">Technology & AI</button>
-            </div>
-        </nav>
-
-        <!-- Add trending ticker -->
-        <div class="ticker-container">
-            <div class="ticker-label">
-                <span class="ticker-icon">🔥</span> TRENDING
-            </div>
-            <div class="ticker-wrapper">
-                <div class="ticker-track" id="tickerTrack">
-                    <!-- Ticker content will be inserted here -->
-                </div>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">SPILL 🔥 TRENDING</a>
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search articles...">
             </div>
         </div>
+    </header>
 
-        <!-- Rest of the content... -->
-    </div>
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-content">
+            <button class="nav-button active" data-feed="all">All News</button>
+            <button class="nav-button" data-feed="movies">Movies & TV</button>
+            <button class="nav-button" data-feed="music">Music</button>
+            <button class="nav-button" data-feed="money">Money</button>
+            <button class="nav-button" data-feed="popculture">Pop Culture</button>
+            <button class="nav-button" data-feed="sports">Sports</button>
+            <button class="nav-button" data-feed="tech">Technology & AI</button>
+        </div>
+    </nav>
 
-    <script src="weather.js"></script>
-    <script src="trend-analyzer.js"></script>
-    <script src="ticker.js"></script>
+    <!-- Main Content -->
+    <main class="content-container">
+        <div class="content-grid">
+            <!-- Articles -->
+            <div class="article-grid" id="articleGrid">
+                <div class="loading">Loading articles...</div>
+            </div>
+
+            <!-- Trending Sidebar -->
+            <aside class="trending-sidebar">
+                <h2 class="trending-title">Trending Topics</h2>
+                <div id="trendingContainer" class="trending-container">
+                    <div class="loading">Analyzing trends...</div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
     <script src="app.js"></script>
 </body>
 </html>
