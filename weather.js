@@ -4,7 +4,7 @@ function updateTime() {
     if (!timeElem) return;
 
     const now = new Date();
-    timeElem.textContent = now.toLocaleTimeString('en-US', { 
+    timeElem.textContent = now.toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
         hour12: true
@@ -25,7 +25,7 @@ async function updateWeather() {
             });
         });
 
-        // Fetch weather data from Open-Meteo API
+        // Fetch weather data
         const response = await fetch(
             `https://api.open-meteo.com/v1/forecast?` +
             `latitude=${pos.coords.latitude}&` +
@@ -33,27 +33,24 @@ async function updateWeather() {
             `current_weather=true&temperature_unit=fahrenheit`
         );
 
-        if (!response.ok) {
-            throw new Error('Weather API error');
-        }
+        if (!response.ok) throw new Error('Weather API error');
 
         const data = await response.json();
         const temp = Math.round(data.current_weather.temperature);
         weatherElem.textContent = `${temp}°F`;
-
     } catch (error) {
         console.error('Weather error:', error);
         weatherElem.textContent = '--°F';
     }
 }
 
-// Initialize time and weather
+// Initialize weather and time
 document.addEventListener('DOMContentLoaded', () => {
     // Initial updates
     updateTime();
     updateWeather();
 
-    // Set up intervals
+    // Set update intervals
     setInterval(updateTime, 60000); // Update time every minute
     setInterval(updateWeather, 900000); // Update weather every 15 minutes
 });
