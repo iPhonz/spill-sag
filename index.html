@@ -5,65 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPILL</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <a href="/" class="logo">SPILL 🔥 TRENDING</a>
-            <div class="search-container">
-                <input type="text" class="search-input" id="searchInput" placeholder="Search articles...">
-            </div>
-            <div class="header-meta">
-                <div id="weatherTemp" class="weather">--°F</div>
-                <div id="localTime" class="time">--:--</div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Navigation -->
-    <nav class="navigation">
-        <div class="nav-content">
-            <button class="nav-button active" data-feed="all">All News</button>
-            <button class="nav-button" data-feed="movies">Movies & TV</button>
-            <button class="nav-button" data-feed="music">Music</button>
-            <button class="nav-button" data-feed="money">Money</button>
-            <button class="nav-button" data-feed="popculture">Pop Culture</button>
-            <button class="nav-button" data-feed="sports">Sports</button>
-            <button class="nav-button" data-feed="tech">Technology & AI</button>
-        </div>
-    </nav>
-
-    <!-- Trending Ticker -->
-    <div class="ticker-container">
-        <div class="ticker-label">🔥 TRENDING</div>
-        <div class="ticker-scroll">
-            <div class="ticker-content" id="tickerContent">
-                <!-- Ticker items will be dynamically added here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <main class="content-container">
-        <div class="content-grid">
-            <!-- Articles -->
-            <div class="article-grid" id="articleGrid">
-                <div class="loading">Loading articles...</div>
-            </div>
-
-            <!-- Trending Sidebar -->
-            <aside class="trending-sidebar">
-                <h2 class="trending-title">Trending Topics</h2>
-                <div id="trendingContainer" class="trending-container">
-                    <div class="loading">Analyzing trends...</div>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <h1 class="logo">SPILL 🔥 TRENDING</h1>
+                <div class="search">
+                    <input type="text" id="searchInput" placeholder="Search articles...">
                 </div>
-            </aside>
-        </div>
-    </main>
+                <div class="meta">
+                    <div id="weatherTemp" class="weather">--°F</div>
+                    <div id="localTime" class="time"></div>
+                </div>
+            </div>
+        </header>
 
-    <!-- Scripts -->
-    <script src="weather.js"></script>
-    <script src="app.js"></script>
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="container">
+                <button class="nav-btn active" data-feed="all">All News</button>
+                <button class="nav-btn" data-feed="movies">Movies & TV</button>
+                <button class="nav-btn" data-feed="music">Music</button>
+                <button class="nav-btn" data-feed="money">Money</button>
+                <button class="nav-btn" data-feed="popculture">Pop Culture</button>
+                <button class="nav-btn" data-feed="sports">Sports</button>
+                <button class="nav-btn" data-feed="tech">Technology & AI</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <div class="grid">
+                    <!-- Articles -->
+                    <section class="articles" id="articles">
+                        <div class="loading">Loading articles...</div>
+                    </section>
+
+                    <!-- Trending -->
+                    <aside class="trending">
+                        <h2>Trending Topics</h2>
+                        <div id="trends" class="trend-list">
+                            <div class="loading">Analyzing trends...</div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </main>
+    </div>
 </body>
 </html>
