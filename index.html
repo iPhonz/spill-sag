@@ -8,18 +8,7 @@
 </head>
 <body>
     <div class="app-container">
-        <header class="header">
-            <div class="header-content">
-                <a href="/" class="logo">SPILL</a>
-                <div class="search-container">
-                    <input type="text" class="search-input" id="searchInput" placeholder="Search articles...">
-                </div>
-                <div class="weather-widget">
-                    <div id="weatherTemp"></div>
-                    <div id="localTime"></div>
-                </div>
-            </div>
-        </header>
+        <!-- Previous header content... -->
 
         <nav class="navigation">
             <div class="nav-content">
@@ -33,24 +22,24 @@
             </div>
         </nav>
 
-        <main class="main-content">
-            <div class="content-grid">
-                <div id="articleGrid" class="article-grid">
-                    <div class="loading">Loading articles...</div>
-                </div>
-
-                <aside class="trending-sidebar">
-                    <h2 class="trending-title">Trending Topics</h2>
-                    <div id="trendingContainer" class="trending-container">
-                        <div class="loading">Analyzing trends...</div>
-                    </div>
-                </aside>
+        <!-- Add trending ticker -->
+        <div class="ticker-container">
+            <div class="ticker-label">
+                <span class="ticker-icon">🔥</span> TRENDING
             </div>
-        </main>
+            <div class="ticker-wrapper">
+                <div class="ticker-track" id="tickerTrack">
+                    <!-- Ticker content will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Rest of the content... -->
     </div>
 
     <script src="weather.js"></script>
     <script src="trend-analyzer.js"></script>
+    <script src="ticker.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
