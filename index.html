@@ -14,6 +14,10 @@
             <div class="search-container">
                 <input type="text" class="search-input" id="searchInput" placeholder="Search articles...">
             </div>
+            <div class="header-meta">
+                <div id="weatherTemp" class="weather">--°F</div>
+                <div id="localTime" class="time">--:--</div>
+            </div>
         </div>
     </header>
 
@@ -31,9 +35,12 @@
     </nav>
 
     <!-- Trending Ticker -->
-    <div class="trending-ticker">
-        <div class="ticker-content" id="tickerContent">
-            <!-- Ticker items will be inserted here -->
+    <div class="ticker-container">
+        <div class="ticker-label">🔥 TRENDING</div>
+        <div class="ticker-scroll">
+            <div class="ticker-content" id="tickerContent">
+                <!-- Ticker items will be dynamically added here -->
+            </div>
         </div>
     </div>
 
@@ -55,6 +62,8 @@
         </div>
     </main>
 
+    <!-- Scripts -->
+    <script src="weather.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
