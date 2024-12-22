@@ -4,75 +4,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPILL</title>
-    <!-- Base styles -->
+    <!-- Critical CSS inline to ensure basic styling -->
     <style>
-        body { margin: 0; padding: 0; background: #0a0a0a; color: #fff; }
-        .loading { text-align: center; padding: 2rem; color: #888; }
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-darker: #111111;
+            --border: #2a2a2a;
+            --text: #ffffff;
+            --text-muted: #888888;
+            --primary: #3b82f6;
+            --error: #ef4444;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: var(--bg-dark);
+            color: var(--text);
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-darker);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+        }
+
+        .logo {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .loading { text-align: center; padding: 2rem; color: var(--text-muted); }
+        .error { text-align: center; padding: 2rem; color: var(--error); }
     </style>
-    <link rel="stylesheet" href="./styles.css">
+    <!-- Non-critical CSS -->
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="components.css">
+    <link rel="stylesheet" href="layout.css">
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <a href="./" class="logo">SPILL</a>
-            <div class="search-container">
-                <input type="text" class="search-input" id="searchInput" placeholder="Search articles...">
-            </div>
-            <div class="header-meta">
-                <div id="weatherTemp" class="weather">--°F</div>
-                <div id="localTime" class="time">--:--</div>
-            </div>
-        </div>
-    </header>
-
-    <nav class="navigation">
-        <div class="nav-content">
-            <button class="nav-button active" data-feed="all">All News</button>
-            <button class="nav-button" data-feed="movies">Movies & TV</button>
-            <button class="nav-button" data-feed="music">Music</button>
-            <button class="nav-button" data-feed="gaming">Gaming</button>
-            <button class="nav-button" data-feed="money">Money</button>
-            <button class="nav-button" data-feed="fashion">Fashion</button>
-            <button class="nav-button" data-feed="fitness">Fitness & Wellness</button>
-            <button class="nav-button" data-feed="food">Food</button>
-            <button class="nav-button" data-feed="popculture">Pop Culture</button>
-            <button class="nav-button" data-feed="sports">Sports</button>
-            <button class="nav-button" data-feed="tech">Technology & AI</button>
-        </div>
-    </nav>
-
-    <div class="ticker-container">
-        <div class="ticker-label">🔥 TRENDING</div>
-        <div class="ticker-scroll">
-            <div class="ticker-content" id="tickerContent"></div>
+    <!-- Error Handling -->
+    <div id="errorContainer" class="error-container" style="display: none;">
+        <div class="error-message">
+            <span id="errorText"></span>
+            <button onclick="window.app?.init()">Retry</button>
         </div>
     </div>
 
-    <main class="content-container">
-        <div class="content-grid">
-            <div class="article-grid" id="articleGrid">
-                <div class="loading">Loading articles...</div>
-            </div>
-
-            <aside class="trending-sidebar">
-                <h2 class="trending-title">Trending Topics</h2>
-                <div id="trendingContainer" class="trending-container">
-                    <div class="loading">Analyzing trends...</div>
+    <!-- App Shell -->
+    <div id="app">
+        <header class="header">
+            <div class="header-content">
+                <a href="./" class="logo">SPILL</a>
+                <div class="search-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search articles...">
                 </div>
-            </aside>
-        </div>
-    </main>
+                <div class="header-meta">
+                    <div id="weatherTemp" class="weather">--°F</div>
+                    <div id="localTime" class="time">--:--</div>
+                </div>
+            </div>
+        </header>
 
-    <!-- Load scripts at end of body -->
-    <script type="text/javascript">
-        // Initialize app state
-        window.SPILL = {
-            initialized: false,
-            loaded: false,
-            error: null
+        <nav class="navigation">
+            <div class="nav-content" id="navContent">
+                <!-- Navigation buttons will be dynamically inserted -->
+            </div>
+        </nav>
+
+        <div class="ticker-container">
+            <div class="ticker-label">🔥 TRENDING</div>
+            <div class="ticker-scroll">
+                <div class="ticker-content" id="tickerContent"></div>
+            </div>
+        </div>
+
+        <main class="content-container">
+            <div class="content-grid">
+                <div class="article-grid" id="articleGrid">
+                    <div class="loading">Loading articles...</div>
+                </div>
+
+                <aside class="trending-sidebar">
+                    <h2 class="trending-title">Trending Topics</h2>
+                    <div id="trendingContainer" class="trending-container">
+                        <div class="loading">Analyzing trends...</div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <!-- App Configuration -->
+    <script>
+        window.APP_CONFIG = {
+            debug: true,
+            refreshInterval: 5 * 60 * 1000, // 5 minutes
+            feeds: {
+                movies: 'https://rss.app/feeds/v1.1/_6QzByBP0Y0E9bL0O.json',
+                music: 'https://rss.app/feeds/v1.1/_p1hbSzosU9dbDQWx.json',
+                gaming: 'https://rss.app/feeds/v1.1/_AYgIOThx2i44ju3d.json',
+                money: 'https://rss.app/feeds/v1.1/_fcZVOvvC7xA6iz8u.json',
+                fashion: 'https://rss.app/feeds/v1.1/_X9X9xi6xSA6xfdiQ.json',
+                fitness: 'https://rss.app/feeds/v1.1/_ZyirDaQbugpe4PNr.json',
+                food: 'https://rss.app/feeds/v1.1/_6RwC4gFPZtiWlR0F.json',
+                popculture: 'https://rss.app/feeds/v1.1/_8Tib7bkE02swlmp7.json',
+                sports: 'https://rss.app/feeds/v1.1/_5pZybCiMDbl5fBo8.json',
+                tech: 'https://rss.app/feeds/v1.1/_GNEAg9D5CvYRIxAQ.json'
+            }
         };
     </script>
-    <script src="./weather.js"></script>
-    <script src="./app.js"></script>
+
+    <!-- Core App Bundle -->
+    <script src="core.js" type="module"></script>
 </body>
 </html>
