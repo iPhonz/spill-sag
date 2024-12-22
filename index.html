@@ -4,76 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPILL</title>
-    <!-- Inline critical CSS to prevent FOUC -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Minimal inline styles for initial loading state -->
     <style>
-        body { margin: 0; padding: 0; background: #0a0a0a; color: white; }
-        .loading { text-align: center; padding: 2rem; color: #888; }
-        #app { opacity: 0; transition: opacity 0.3s; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            color: #ffffff;
+            font-family: -apple-system, system-ui, sans-serif;
+        }
     </style>
-    <!-- Main stylesheet with load error handling -->
-    <link rel="stylesheet" href="styles.css" onerror="handleStyleError()">
 </head>
 <body>
-    <!-- Rest of the HTML structure remains the same... -->
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="./" class="logo">SPILL</a>
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search articles...">
+            </div>
+            <div class="header-meta">
+                <div id="weatherTemp" class="weather">--°F</div>
+                <div id="localTime" class="time">--:--</div>
+            </div>
+        </div>
+    </header>
 
-    <!-- Resource Loading Script -->
-    <script>
-        // Track resource loading
-        let resourcesLoaded = 0;
-        const totalResources = 3; // CSS, weather.js, app.js
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-content">
+            <button class="nav-button active" data-feed="all">All News</button>
+            <button class="nav-button" data-feed="movies">Movies & TV</button>
+            <button class="nav-button" data-feed="music">Music</button>
+            <button class="nav-button" data-feed="gaming">Gaming</button>
+            <button class="nav-button" data-feed="money">Money</button>
+            <button class="nav-button" data-feed="fashion">Fashion</button>
+            <button class="nav-button" data-feed="fitness">Fitness & Wellness</button>
+            <button class="nav-button" data-feed="food">Food</button>
+            <button class="nav-button" data-feed="popculture">Pop Culture</button>
+            <button class="nav-button" data-feed="sports">Sports</button>
+            <button class="nav-button" data-feed="tech">Technology & AI</button>
+        </div>
+    </nav>
 
-        function handleResourceLoad() {
-            resourcesLoaded++;
-            if (resourcesLoaded === totalResources) {
-                document.getElementById('app').style.opacity = '1';
-            }
-        }
+    <!-- Trending Ticker -->
+    <div class="ticker-container">
+        <div class="ticker-label">🔥 TRENDING</div>
+        <div class="ticker-scroll">
+            <div class="ticker-content" id="tickerContent">
+                <!-- Ticker items will be dynamically added here -->
+            </div>
+        </div>
+    </div>
 
-        function handleStyleError() {
-            showError('Failed to load styles');
-        }
+    <!-- Main Content -->
+    <main class="content-container">
+        <div class="content-grid">
+            <!-- Articles -->
+            <div class="article-grid" id="articleGrid">
+                <div class="loading">Loading articles...</div>
+            </div>
 
-        function showError(message) {
-            const errorContainer = document.getElementById('errorContainer');
-            const errorText = document.getElementById('errorText');
-            if (errorContainer && errorText) {
-                errorText.textContent = message;
-                errorContainer.style.display = 'block';
-            }
-        }
+            <!-- Trending Sidebar -->
+            <aside class="trending-sidebar">
+                <h2 class="trending-title">Trending Topics</h2>
+                <div id="trendingContainer" class="trending-container">
+                    <div class="loading">Analyzing trends...</div>
+                </div>
+            </aside>
+        </div>
+    </main>
 
-        // Load JS resources
-        function loadScript(src) {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = src;
-                script.onload = () => { handleResourceLoad(); resolve(); };
-                script.onerror = () => {
-                    console.error(`Failed to load ${src}`);
-                    reject(new Error(`Failed to load ${src}`));
-                };
-                document.body.appendChild(script);
-            });
-        }
-
-        // Initialize app
-        async function initializeApp() {
-            try {
-                await Promise.all([
-                    loadScript('weather.js'),
-                    loadScript('app.js')
-                ]);
-            } catch (error) {
-                showError(error.message);
-                console.error('Resource loading error:', error);
-            }
-        }
-
-        // Start loading resources
-        window.addEventListener('DOMContentLoaded', () => {
-            handleResourceLoad(); // Count CSS as loaded
-            initializeApp();
-        });
-    </script>
+    <!-- Scripts -->
+    <script src="weather.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
