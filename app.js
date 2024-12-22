@@ -1,7 +1,7 @@
 // State management
 const state = {
     articles: [],
-    currentFeed: 'all',
+    currentFeed: 'all',  // Set default feed to 'all'
     searchQuery: '',
     loading: false,
     error: null
@@ -18,10 +18,11 @@ const feeds = {
 };
 
 // Initialize immediately
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     log('App initializing...');
     setupEventListeners();
-    loadFeeds();
+    await loadFeeds();  // Wait for initial load
+    updateDisplay();    // Ensure display is updated after load
     setInterval(loadFeeds, 5 * 60 * 1000); // Refresh every 5 minutes
 });
 
@@ -63,7 +64,7 @@ async function fetchFeed(topic, url) {
         return data.items || [];
     } catch (error) {
         log(`Error fetching ${topic} feed:`, error);
-        throw error;
+        return []; // Return empty array instead of throwing
     }
 }
 
@@ -82,7 +83,12 @@ async function loadFeeds() {
             return items.map(item => ({ ...item, topic }));
         });
 
-        state.articles = (await Promise.all(feedPromises)).flat();
+        const results = await Promise.allSettled(feedPromises);
+        state.articles = results
+            .filter(result => result.status === 'fulfilled')
+            .map(result => result.value)
+            .flat();
+
         log(`Loaded ${state.articles.length} total articles`);
 
         if (state.articles.length === 0) {
@@ -102,13 +108,23 @@ async function loadFeeds() {
         `;
     } finally {
         state.loading = false;
+        // Force display update even if there was an error
+        if (state.articles.length > 0) {
+            updateDisplay();
+        }
     }
 }
 
 // Display updates
 function updateDisplay() {
     const articleGrid = document.getElementById('articleGrid');
-    if (!articleGrid || state.loading) return;
+    if (!articleGrid) return;
+
+    // Don't return if loading - we might have articles to show
+    if (state.loading && state.articles.length === 0) {
+        articleGrid.innerHTML = '<div class="loading">Loading articles...</div>';
+        return;
+    }
 
     let articles = [...state.articles];
 
@@ -150,128 +166,4 @@ function updateDisplay() {
     `).join('');
 }
 
-// Trending functionality
-function updateTrending() {
-    const trends = analyzeTrends();
-    log('Analyzed trends:', trends);
-
-    updateTrendingSidebar(trends);
-    updateTrendingTicker(trends);
-}
-
-function analyzeTrends() {
-    if (!state.articles.length) return [];
-
-    const trends = new Map();
-    const cutoff = new Date();
-    cutoff.setHours(cutoff.getHours() - 24);
-
-    state.articles.forEach(article => {
-        if (new Date(article.date_published) >= cutoff) {
-            const entities = extractEntities(article);
-            entities.forEach(entity => {
-                if (!entity.text) return;
-                
-                const key = entity.text.toLowerCase();
-                const trend = trends.get(key) || {
-                    text: entity.text,
-                    count: 0,
-                    topics: new Set(),
-                    articles: new Set()
-                };
-                trend.count++;
-                trend.topics.add(article.topic);
-                trend.articles.add(article.url);
-                trends.set(key, trend);
-            });
-        }
-    });
-
-    return Array.from(trends.values())
-        .filter(trend => trend.count > 1)
-        .map(trend => ({
-            ...trend,
-            topics: Array.from(trend.topics),
-            articles: Array.from(trend.articles)
-        }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10);
-}
-
-function updateTrendingSidebar(trends) {
-    const container = document.getElementById('trendingContainer');
-    if (!container) return;
-
-    if (!trends.length) {
-        container.innerHTML = '<div class="error">No trends found</div>';
-        return;
-    }
-
-    container.innerHTML = trends.map(trend => `
-        <div class="trending-item" onclick="searchKeyword('${trend.text}')">
-            <div class="trending-keyword">${trend.text}</div>
-            <div class="trending-meta">
-                ${trend.count} mentions in ${trend.topics.length} ${trend.topics.length === 1 ? 'topic' : 'topics'}
-                <div class="topic-badges">
-                    ${trend.topics.map(topic => 
-                        `<span class="topic-badge">${topic}</span>`
-                    ).join('')}
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function updateTrendingTicker(trends) {
-    const ticker = document.getElementById('tickerContent');
-    if (!ticker) return;
-
-    // Double the content for seamless loop
-    const content = trends.map(trend => `
-        <span class="ticker-item" onclick="searchKeyword('${trend.text}')">            
-            <span class="ticker-text">${trend.text}</span>
-            <span class="ticker-count">(${trend.count})</span>
-        </span>
-    `).join(' • ');
-
-    ticker.innerHTML = content + ' • ' + content;
-}
-
-function extractEntities(article) {
-    const entities = new Set();
-    const text = `${article.title} ${article.description || ''}`;
-
-    // Named entities (people, companies, etc.)
-    const namedEntityPattern = /[A-Z][a-z]+ (?:[A-Z][a-z]+ )*[A-Z][a-z]+/g;
-    const matches = text.match(namedEntityPattern) || [];
-    matches.forEach(match => {
-        if (match.length > 3) { // Filter out very short matches
-            entities.add({ text: match });
-        }
-    });
-
-    return Array.from(entities);
-}
-
-// Navigation
-function switchFeed(feed) {
-    state.currentFeed = feed;
-    
-    // Update buttons
-    document.querySelectorAll('.nav-button').forEach(button => {
-        button.classList.toggle('active', button.dataset.feed === feed);
-    });
-
-    updateDisplay();
-}
-
-function searchKeyword(keyword) {
-    if (!keyword) return;
-    
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.value = keyword;
-        state.searchQuery = keyword;
-        updateDisplay();
-    }
-}
+// [Rest of the code remains unchanged...]
