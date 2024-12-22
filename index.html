@@ -3,34 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPILL - Trending News</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>SPILL</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="header">
-        <h1 class="logo">SPILL</h1>
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search articles..." class="search-input">
-        </div>
-        <div class="weather-info" id="weatherInfo">--°F</div>
-    </header>
+    <div class="container">
+        <header>
+            <h1>SPILL</h1>
+            <input type="text" id="searchInput" placeholder="Search articles...">
+            <div id="weatherDisplay">--°F</div>
+        </header>
 
-    <main class="main-content">
-        <section class="trending-section">
-            <h2 class="section-title">TRENDING</h2>
-            <div id="articlesContainer" class="articles-container">
-                <div class="loading-spinner" id="articlesSpinner"></div>
-            </div>
-        </section>
+        <main>
+            <section>
+                <h2>TRENDING</h2>
+                <div id="articlesList"></div>
+            </section>
 
-        <aside class="trending-topics">
-            <h2 class="section-title">Trending Topics</h2>
-            <div id="trendsContainer" class="trends-container">
-                <div class="loading-spinner" id="trendsSpinner"></div>
-            </div>
-        </aside>
-    </main>
-
-    <script type="module" src="js/app.js"></script>
+            <section>
+                <h2>Trending Topics</h2>
+                <div id="trendsList"></div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
 </body>
 </html>
