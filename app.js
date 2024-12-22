@@ -1,10 +1,12 @@
-// State management
+// State management with loading states per feed
 const state = {
     articles: [],
-    currentFeed: 'all',  // Set default feed to 'all'
+    currentFeed: 'all',
     searchQuery: '',
     loading: false,
-    error: null
+    feedStates: {},  // Track loading state per feed
+    error: null,
+    initialized: false
 };
 
 // RSS Feed URLs
@@ -17,14 +19,66 @@ const feeds = {
     tech: 'https://rss.app/feeds/v1.1/_GNEAg9D5CvYRIxAQ.json'
 };
 
-// Initialize immediately
-document.addEventListener('DOMContentLoaded', async () => {
+// Initialize feed states
+Object.keys(feeds).forEach(feed => {
+    state.feedStates[feed] = {
+        loading: false,
+        error: null,
+        lastUpdated: null
+    };
+});
+
+// Initialize immediately with improved loading management
+document.addEventListener('DOMContentLoaded', () => {
     log('App initializing...');
     setupEventListeners();
-    await loadFeeds();  // Wait for initial load
-    updateDisplay();    // Ensure display is updated after load
-    setInterval(loadFeeds, 5 * 60 * 1000); // Refresh every 5 minutes
+    initializeContent();
 });
+
+// New initialization function with better state management
+async function initializeContent() {
+    if (state.initialized) return;
+    
+    const articleGrid = document.getElementById('articleGrid');
+    if (!articleGrid) return;
+
+    state.loading = true;
+    state.error = null;
+    updateLoadingUI();
+
+    try {
+        await loadFeeds();
+        state.initialized = true;
+    } catch (error) {
+        log('Initialization error:', error);
+        state.error = error.message;
+    } finally {
+        state.loading = false;
+        updateDisplay();
+    }
+}
+
+// Update loading UI based on state
+function updateLoadingUI() {
+    const articleGrid = document.getElementById('articleGrid');
+    if (!articleGrid) return;
+
+    if (state.loading && state.articles.length === 0) {
+        articleGrid.innerHTML = `
+            <div class="loading-container">
+                <div class="loading">Loading articles...</div>
+                <div class="loading-status">
+                    ${Object.entries(state.feedStates)
+                        .map(([feed, status]) => 
+                            `<div class="feed-status ${status.loading ? 'loading' : status.error ? 'error' : 'done'}">
+                                ${feed}: ${status.loading ? 'Loading...' : status.error ? 'Error' : 'Done'}
+                            </div>`
+                        ).join('')}
+                </div>
+            </div>
+        `;
+    }
+}
 
 // Debug logging
 function log(message, data = '') {
@@ -33,7 +87,6 @@ function log(message, data = '') {
 
 // Event listeners setup
 function setupEventListeners() {
-    // Search input
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
@@ -42,7 +95,6 @@ function setupEventListeners() {
         });
     }
 
-    // Navigation buttons
     document.querySelectorAll('.nav-button').forEach(button => {
         button.addEventListener('click', () => {
             const feed = button.dataset.feed;
@@ -53,76 +105,67 @@ function setupEventListeners() {
     });
 }
 
-// Feed management
+// Improved feed management with individual feed state tracking
 async function fetchFeed(topic, url) {
-    log(`Fetching ${topic} feed...`);
+    state.feedStates[topic].loading = true;
+    state.feedStates[topic].error = null;
+    updateLoadingUI();
+
     try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        log(`${topic} feed fetched: ${data.items?.length || 0} items`);
+        state.feedStates[topic].lastUpdated = new Date();
         return data.items || [];
     } catch (error) {
-        log(`Error fetching ${topic} feed:`, error);
-        return []; // Return empty array instead of throwing
+        state.feedStates[topic].error = error.message;
+        return [];
+    } finally {
+        state.feedStates[topic].loading = false;
+        updateLoadingUI();
     }
 }
 
+// Enhanced feed loading with better state management
 async function loadFeeds() {
-    const articleGrid = document.getElementById('articleGrid');
-    if (!articleGrid) return;
-
     state.loading = true;
-    state.error = null;
-    articleGrid.innerHTML = '<div class="loading">Loading articles...</div>';
+    updateLoadingUI();
 
     try {
-        log('Loading feeds...');
         const feedPromises = Object.entries(feeds).map(async ([topic, url]) => {
             const items = await fetchFeed(topic, url);
             return items.map(item => ({ ...item, topic }));
         });
 
         const results = await Promise.allSettled(feedPromises);
-        state.articles = results
+        const newArticles = results
             .filter(result => result.status === 'fulfilled')
             .map(result => result.value)
             .flat();
 
-        log(`Loaded ${state.articles.length} total articles`);
-
-        if (state.articles.length === 0) {
-            throw new Error('No articles found');
+        if (newArticles.length === 0 && !state.articles.length) {
+            throw new Error('No articles available');
         }
 
+        state.articles = newArticles;
         updateDisplay();
         updateTrending();
     } catch (error) {
-        log('Error loading feeds:', error);
         state.error = error.message;
-        articleGrid.innerHTML = `
-            <div class="error">
-                Failed to load articles: ${error.message}
-                <button onclick="loadFeeds()" class="retry-button">Retry</button>
-            </div>
-        `;
+        log('Error loading feeds:', error);
     } finally {
         state.loading = false;
-        // Force display update even if there was an error
-        if (state.articles.length > 0) {
-            updateDisplay();
-        }
+        updateLoadingUI();
     }
 }
 
-// Display updates
+// Enhanced display updates with loading state handling
 function updateDisplay() {
     const articleGrid = document.getElementById('articleGrid');
     if (!articleGrid) return;
 
-    // Don't return if loading - we might have articles to show
     if (state.loading && state.articles.length === 0) {
-        articleGrid.innerHTML = '<div class="loading">Loading articles...</div>';
+        updateLoadingUI();
         return;
     }
 
@@ -143,7 +186,12 @@ function updateDisplay() {
     articles.sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
 
     if (articles.length === 0) {
-        articleGrid.innerHTML = '<div class="no-results">No articles found</div>';
+        articleGrid.innerHTML = `
+            <div class="no-results">
+                ${state.error ? `Error: ${state.error}` : 'No articles found'}
+                ${state.error ? '<button onclick="initializeContent()" class="retry-button">Retry</button>' : ''}
+            </div>
+        `;
         return;
     }
 
