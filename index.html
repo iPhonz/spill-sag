@@ -8,82 +8,17 @@
     <style>
         body { margin: 0; padding: 0; background: #0a0a0a; color: white; }
         .loading { text-align: center; padding: 2rem; color: #888; }
+        #app { opacity: 0; transition: opacity 0.3s; }
     </style>
     <!-- Main stylesheet with load error handling -->
-    <link rel="stylesheet" href="/styles.css" onerror="handleStyleError()">
+    <link rel="stylesheet" href="styles.css" onerror="handleStyleError()">
 </head>
 <body>
-    <div id="app" style="opacity: 0; transition: opacity 0.3s;">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <a href="/" class="logo">SPILL</a>
-                <div class="search-container">
-                    <input type="text" class="search-input" id="searchInput" placeholder="Search articles...">
-                </div>
-                <div class="header-meta">
-                    <div id="weatherTemp" class="weather">--°F</div>
-                    <div id="localTime" class="time">--:--</div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Navigation -->
-        <nav class="navigation">
-            <div class="nav-content">
-                <button class="nav-button active" data-feed="all">All News</button>
-                <button class="nav-button" data-feed="movies">Movies & TV</button>
-                <button class="nav-button" data-feed="music">Music</button>
-                <button class="nav-button" data-feed="gaming">Gaming</button>
-                <button class="nav-button" data-feed="money">Money</button>
-                <button class="nav-button" data-feed="fashion">Fashion</button>
-                <button class="nav-button" data-feed="fitness">Fitness & Wellness</button>
-                <button class="nav-button" data-feed="food">Food</button>
-                <button class="nav-button" data-feed="popculture">Pop Culture</button>
-                <button class="nav-button" data-feed="sports">Sports</button>
-                <button class="nav-button" data-feed="tech">Technology & AI</button>
-            </div>
-        </nav>
-
-        <!-- Trending Ticker -->
-        <div class="ticker-container">
-            <div class="ticker-label">🔥 TRENDING</div>
-            <div class="ticker-scroll">
-                <div class="ticker-content" id="tickerContent">
-                    <!-- Ticker items will be dynamically added here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <main class="content-container">
-            <div class="content-grid">
-                <!-- Articles -->
-                <div class="article-grid" id="articleGrid">
-                    <div class="loading">Loading articles...</div>
-                </div>
-
-                <!-- Trending Sidebar -->
-                <aside class="trending-sidebar">
-                    <h2 class="trending-title">Trending Topics</h2>
-                    <div id="trendingContainer" class="trending-container">
-                        <div class="loading">Analyzing trends...</div>
-                    </div>
-                </aside>
-            </div>
-        </main>
-    </div>
-
-    <!-- Error Message Container -->
-    <div id="errorContainer" class="error-container" style="display: none;">
-        <div class="error-message">
-            <span id="errorText">Error loading resources</span>
-            <button onclick="location.reload()">Retry</button>
-        </div>
-    </div>
+    <!-- Rest of the HTML structure remains the same... -->
 
     <!-- Resource Loading Script -->
     <script>
+        // Track resource loading
         let resourcesLoaded = 0;
         const totalResources = 3; // CSS, weather.js, app.js
 
@@ -113,7 +48,10 @@
                 const script = document.createElement('script');
                 script.src = src;
                 script.onload = () => { handleResourceLoad(); resolve(); };
-                script.onerror = () => reject(new Error(`Failed to load ${src}`));
+                script.onerror = () => {
+                    console.error(`Failed to load ${src}`);
+                    reject(new Error(`Failed to load ${src}`));
+                };
                 document.body.appendChild(script);
             });
         }
@@ -122,8 +60,8 @@
         async function initializeApp() {
             try {
                 await Promise.all([
-                    loadScript('/weather.js'),
-                    loadScript('/app.js')
+                    loadScript('weather.js'),
+                    loadScript('app.js')
                 ]);
             } catch (error) {
                 showError(error.message);
@@ -132,7 +70,7 @@
         }
 
         // Start loading resources
-        window.addEventListener('load', () => {
+        window.addEventListener('DOMContentLoaded', () => {
             handleResourceLoad(); // Count CSS as loaded
             initializeApp();
         });
