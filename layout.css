@@ -1,19 +1,75 @@
 /* Main Layout */
 .content-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 2rem auto;
     padding: 0 1rem;
 }
 
 .content-grid {
     display: grid;
-    grid-template-columns: 1fr 300px;
+    grid-template-columns: minmax(0, 1fr) 300px;
     gap: 2rem;
 }
 
+/* Article Grid */
 .article-grid {
     display: grid;
-    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+.article-card {
+    position: relative;
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--bg-darker);
+}
+
+.article-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.article-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.5rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8) 40%);
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: all 0.3s ease;
+}
+
+.article-card:hover .article-content {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.article-card:hover .article-image {
+    transform: scale(1.05);
+}
+
+.article-title {
+    color: white;
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.article-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.875rem;
 }
 
 /* Navigation Layout */
@@ -25,14 +81,47 @@
     z-index: 10;
 }
 
-/* Responsive Layout */
-@media (max-width: 1024px) {
-    .content-container {
-        margin: 1rem auto;
-    }
+/* Ticker */
+.ticker-container {
+    background: var(--bg-darker);
+    border-bottom: 1px solid var(--border);
+    height: 40px;
+    overflow: hidden;
+}
 
-    .content-grid {
-        gap: 1rem;
+.ticker-content {
+    animation: ticker 45s linear infinite; /* Slowed down from 30s to 45s */
+}
+
+@keyframes ticker {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+/* Loading States */
+.loading-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.loading-card {
+    aspect-ratio: 16/9;
+    background: var(--bg-darker);
+    border-radius: 12px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.4; }
+}
+
+/* Responsive Layout */
+@media (max-width: 1200px) {
+    .article-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -48,6 +137,10 @@
     }
 
     .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .article-grid {
         grid-template-columns: 1fr;
     }
 
@@ -70,6 +163,10 @@
     }
 
     .content-grid {
+        display: block;
+    }
+
+    .article-grid {
         display: block;
     }
 
