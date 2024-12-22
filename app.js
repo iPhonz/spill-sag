@@ -1,4 +1,4 @@
-// Feed URLs
+// RSS Feed URLs
 const FEEDS = {
     movies: 'https://rss.app/feeds/v1.1/_6QzByBP0Y0E9bL0O.json',
     music: 'https://rss.app/feeds/v1.1/_p1hbSzosU9dbDQWx.json',
@@ -13,72 +13,100 @@ let articles = [];
 let currentFeed = 'all';
 let searchQuery = '';
 
-// Initialize immediately
+// Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Set up event listeners
-    setupNavigation();
-    setupSearch();
-    
+    // Set up search
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            searchQuery = e.target.value;
+            displayArticles();
+        });
+    }
+
+    // Set up navigation
+    const navButtons = document.querySelectorAll('.nav-button');
+    navButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            const feed = this.getAttribute('data-feed');
+            if (feed) {
+                currentFeed = feed;
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                displayArticles();
+            }
+        });
+    });
+
     // Start content loading
-    loadContent();
-    
-    // Initialize utilities
+    loadFeeds();
+
+    // Update clock
     updateClock();
+    setInterval(updateClock, 1000);
+
+    // Update weather
     updateWeather();
-    
-    // Set up refresh intervals
-    setInterval(loadContent, 5 * 60 * 1000);  // Refresh content every 5 minutes
-    setInterval(updateClock, 1000);           // Update clock every second
-    setInterval(updateWeather, 60 * 1000);    // Update weather every minute
+    setInterval(updateWeather, 60 * 1000);
+
+    // Refresh content periodically
+    setInterval(loadFeeds, 5 * 60 * 1000);
 });
 
-// Load all content
-async function loadContent() {
+// Load all feeds
+async function loadFeeds() {
     const articleGrid = document.getElementById('articleGrid');
     if (!articleGrid) return;
 
-    // Show loading state
-    articleGrid.innerHTML = getLoadingSkeleton();
-
     try {
-        // Load all feeds in parallel
-        const feedPromises = Object.entries(FEEDS).map(async ([topic, url]) => {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json();
-                return (data.items || []).map(item => ({ ...item, topic }));
-            } catch (error) {
-                console.error(`Error loading ${topic} feed:`, error);
-                return [];
-            }
-        });
+        articleGrid.innerHTML = `
+            <div class="loading">Loading articles...</div>
+        `;
 
-        // Wait for all feeds
-        const results = await Promise.all(feedPromises);
+        const results = await Promise.all(
+            Object.entries(FEEDS).map(async ([topic, url]) => {
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) return [];
+                    const data = await response.json();
+                    return (data.items || []).map(item => ({ ...item, topic }));
+                } catch (err) {
+                    console.error(`Error loading ${topic}:`, err);
+                    return [];
+                }
+            })
+        );
+
         articles = results.flat();
-
         if (articles.length === 0) {
-            showError('No articles available');
+            articleGrid.innerHTML = `
+                <div class="error">
+                    No articles available
+                    <button onclick="loadFeeds()">Retry</button>
+                </div>
+            `;
             return;
         }
 
-        // Update display
-        updateDisplay();
+        displayArticles();
         updateTrending();
 
-    } catch (error) {
-        showError('Failed to load content');
-        console.error('Content loading error:', error);
+    } catch (err) {
+        console.error('Failed to load feeds:', err);
+        articleGrid.innerHTML = `
+            <div class="error">
+                Failed to load articles
+                <button onclick="loadFeeds()">Retry</button>
+            </div>
+        `;
     }
 }
 
-// Update article display
-function updateDisplay() {
+// Display articles
+function displayArticles() {
     const articleGrid = document.getElementById('articleGrid');
     if (!articleGrid) return;
 
-    // Filter articles
     let filtered = [...articles];
 
     if (currentFeed !== 'all') {
@@ -93,23 +121,20 @@ function updateDisplay() {
         );
     }
 
-    // Sort by date
     filtered.sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
 
-    // Show no results if needed
     if (filtered.length === 0) {
         articleGrid.innerHTML = '<div class="no-results">No articles found</div>';
         return;
     }
 
-    // Render articles
     articleGrid.innerHTML = filtered.map(article => `
-        <article class="article-card" onclick="openArticle('${article.url}')">
+        <article class="article-card" onclick="window.open('${article.url}', '_blank')">
             ${article.image ? `
                 <img src="${article.image}" 
                      alt="${article.title}" 
                      class="article-image"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>'">
+                     onerror="this.style.display='none'">
             ` : `
                 <div class="article-image placeholder"></div>
             `}
@@ -124,46 +149,37 @@ function updateDisplay() {
     `).join('');
 }
 
-// Update trending section
+// Update trending
 function updateTrending() {
     const trends = analyzeTrends();
-    updateTicker(trends);
-    updateTrendingSidebar(trends);
-}
-
-// Update ticker display
-function updateTicker(trends) {
+    
+    // Update ticker
     const ticker = document.getElementById('tickerContent');
-    if (!ticker) return;
+    if (ticker) {
+        const tickerContent = trends.map(t => 
+            `<span class="ticker-item" onclick="searchFor('${t.text}')">${t.text} (${t.count})</span>`
+        ).join(' • ');
+        ticker.innerHTML = `${tickerContent} • ${tickerContent} • ${tickerContent}`;
+        restartTickerAnimation(ticker);
+    }
 
-    const content = trends.map(trend => 
-        `<span class="ticker-item" onclick="searchFor('${trend.text}')">
-            ${trend.text} (${trend.count})
-        </span>`
-    ).join(' • ');
-
-    ticker.innerHTML = `${content} • ${content} • ${content}`;
-    resetTickerAnimation(ticker);
-}
-
-// Update trending sidebar
-function updateTrendingSidebar(trends) {
-    const container = document.getElementById('trendingContainer');
-    if (!container) return;
-
-    container.innerHTML = trends.map(trend => `
-        <div class="trending-item" onclick="searchFor('${trend.text}')">
-            <div class="trending-keyword">${trend.text}</div>
-            <div class="trending-meta">
-                ${trend.count} mentions in ${trend.topics.length} ${trend.topics.length === 1 ? 'topic' : 'topics'}
-                <div class="topic-badges">
-                    ${trend.topics.map(topic => 
-                        `<span class="topic-badge">${topic.charAt(0).toUpperCase() + topic.slice(1)}</span>`
-                    ).join('')}
+    // Update sidebar
+    const trendingContainer = document.getElementById('trendingContainer');
+    if (trendingContainer) {
+        trendingContainer.innerHTML = trends.map(trend => `
+            <div class="trending-item" onclick="searchFor('${trend.text}')">
+                <div class="trending-keyword">${trend.text}</div>
+                <div class="trending-meta">
+                    ${trend.count} mentions in ${trend.topics.length} topics
+                    <div class="topic-badges">
+                        ${trend.topics.map(topic => 
+                            `<span class="topic-badge">${topic.charAt(0).toUpperCase() + topic.slice(1)}</span>`
+                        ).join('')}
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `).join('');
+    }
 }
 
 // Analyze trends
@@ -197,69 +213,17 @@ function analyzeTrends() {
         .slice(0, 8);
 }
 
-// Setup navigation
-function setupNavigation() {
-    document.querySelectorAll('.nav-button').forEach(button => {
-        button.addEventListener('click', () => {
-            currentFeed = button.dataset.feed;
-            document.querySelectorAll('.nav-button').forEach(btn => 
-                btn.classList.toggle('active', btn === button)
-            );
-            updateDisplay();
-        });
-    });
-}
-
-// Setup search
-function setupSearch() {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value;
-            updateDisplay();
-        });
-    }
-}
-
 // Utility functions
-function openArticle(url) {
-    if (url) window.open(url, '_blank');
-}
-
 function searchFor(text) {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.value = text;
         searchQuery = text;
-        updateDisplay();
+        displayArticles();
     }
 }
 
-function showError(message) {
-    const articleGrid = document.getElementById('articleGrid');
-    if (articleGrid) {
-        articleGrid.innerHTML = `
-            <div class="error-message">
-                ${message}
-                <button onclick="loadContent()">Retry</button>
-            </div>
-        `;
-    }
-}
-
-function getLoadingSkeleton() {
-    return Array(6).fill(`
-        <div class="loading-card">
-            <div class="loading-image"></div>
-            <div class="loading-content">
-                <div class="loading-title"></div>
-                <div class="loading-meta"></div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function resetTickerAnimation(ticker) {
+function restartTickerAnimation(ticker) {
     ticker.style.animation = 'none';
     ticker.offsetHeight; // Force reflow
     ticker.style.animation = 'ticker 45s linear infinite';
