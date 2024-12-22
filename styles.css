@@ -1,152 +1,119 @@
-/* Reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* Previous styles remain... */
 
-/* Base Styles */
-body {
-    background-color: #0a0a0a;
-    color: #ffffff;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    min-height: 100vh;
-    line-height: 1.5;
-}
-
-/* Header */
-.header {
-    background-color: #111111;
-    border-bottom: 1px solid #2a2a2a;
-    padding: 1rem;
-}
-
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-}
-
-.logo {
-    color: #3b82f6;
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-.search-container {
-    flex: 1;
-    max-width: 600px;
-}
-
-.search-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
-    border-radius: 8px;
-    color: #ffffff;
-    font-size: 1rem;
-}
-
-/* Navigation */
-.navigation {
+/* Trending Ticker */
+.ticker-container {
     background: #111111;
     border-bottom: 1px solid #2a2a2a;
-    padding: 0.5rem;
-    overflow-x: auto;
-}
-
-.nav-content {
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 0.75rem;
+    overflow: hidden;
+    position: relative;
     display: flex;
-    gap: 0.5rem;
+    align-items: center;
+    height: 40px;
 }
 
-.nav-button {
-    background: transparent;
-    border: 1px solid transparent;
-    color: #888888;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.875rem;
-    white-space: nowrap;
-}
-
-.nav-button:hover {
-    background: #1a1a1a;
-    color: #ffffff;
-}
-
-.nav-button.active {
+.ticker-label {
     background: #3b82f6;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-right: 1rem;
+    white-space: nowrap;
+    z-index: 2;
+}
+
+.ticker-scroll {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    mask-image: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+
+.ticker-content {
+    position: absolute;
+    white-space: nowrap;
+    will-change: transform;
+    animation: tickerScroll 30s linear infinite;
+}
+
+@keyframes tickerScroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+.ticker-item {
+    display: inline-block;
+    padding: 0 1rem;
+    color: #888888;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.ticker-item:hover {
     color: #ffffff;
 }
 
-/* Main Content */
-.content-container {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-}
-
-.content-grid {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 2rem;
-}
-
-/* Articles */
-.article-grid {
-    display: grid;
-    gap: 1rem;
-}
-
-.article-card {
+/* Trending Sidebar */
+.trending-sidebar {
     background: #111111;
     border: 1px solid #2a2a2a;
     border-radius: 12px;
-    overflow: hidden;
+    padding: 1.5rem;
+    position: sticky;
+    top: 1rem;
 }
 
-.article-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-}
-
-.article-content {
-    padding: 1rem;
-}
-
-.article-title {
+.trending-title {
     font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.trending-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.trending-item {
+    padding: 1rem;
+    background: #1a1a1a;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.trending-item:hover {
+    background: #222222;
+}
+
+.trending-keyword {
+    font-weight: 500;
     margin-bottom: 0.5rem;
 }
 
-/* Loading States */
-.loading {
-    text-align: center;
-    padding: 2rem;
+.trending-meta {
+    font-size: 0.875rem;
     color: #888888;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
+.topic-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
 
-    .trending-sidebar {
-        display: none;
-    }
-
-    .header-content {
-        flex-direction: column;
-        gap: 1rem;
-    }
+.topic-badge {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
 }
