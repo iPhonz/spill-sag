@@ -1,121 +1,202 @@
-// Previous state management and feed code remains...
+// State management
+const state = {
+    articles: [],
+    currentFeed: 'all',
+    searchQuery: '',
+    loading: true,
+    error: null
+};
 
-// Trending functionality
-function updateTrending() {
-    const trends = analyzeTrends();
-    updateTrendingSidebar(trends);
-    updateTicker(trends);
+// RSS Feed URLs
+const feeds = {
+    movies: 'https://rss.app/feeds/v1.1/_6QzByBP0Y0E9bL0O.json',
+    music: 'https://rss.app/feeds/v1.1/_p1hbSzosU9dbDQWx.json',
+    money: 'https://rss.app/feeds/v1.1/_fcZVOvvC7xA6iz8u.json',
+    popculture: 'https://rss.app/feeds/v1.1/_8Tib7bkE02swlmp7.json',
+    sports: 'https://rss.app/feeds/v1.1/_5pZybCiMDbl5fBo8.json',
+    tech: 'https://rss.app/feeds/v1.1/_GNEAg9D5CvYRIxAQ.json',
+    fashion: 'https://rss.app/feeds/v1.1/_X9X9xi6xSA6xfdiQ.json',
+    fitness: 'https://rss.app/feeds/v1.1/_ZyirDaQbugpe4PNr.json',
+    food: 'https://rss.app/feeds/v1.1/_6RwC4gFPZtiWlR0F.json',
+    gaming: 'https://rss.app/feeds/v1.1/_AYgIOThx2i44ju3d.json'
+};
+
+// Initialize app
+async function initializeApp() {
+    if (window.SPILL.initialized) return;
+    
+    try {
+        setupEventListeners();
+        await loadInitialContent();
+        window.SPILL.initialized = true;
+        window.SPILL.loaded = true;
+    } catch (error) {
+        console.error('Initialization error:', error);
+        window.SPILL.error = error.message;
+        showError('Failed to initialize app: ' + error.message);
+    }
 }
 
-function analyzeTrends() {
-    if (!state.articles.length) return [];
+// Event listeners setup
+function setupEventListeners() {
+    // Search handler
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            state.searchQuery = e.target.value;
+            updateDisplay();
+        });
+    }
 
-    const trends = new Map();
-    const cutoff = new Date();
-    cutoff.setHours(cutoff.getHours() - 24);
-
-    state.articles.forEach(article => {
-        if (new Date(article.date_published) >= cutoff) {
-            const entities = extractEntities(article);
-            
-            entities.forEach(entity => {
-                if (!entity.text || entity.text.length < 3) return;
-                
-                const key = entity.text.toLowerCase();
-                const trend = trends.get(key) || {
-                    text: entity.text,
-                    count: 0,
-                    topics: new Set(),
-                    articles: new Set()
-                };
-
-                trend.count++;
-                trend.topics.add(article.topic);
-                trend.articles.add(article.url);
-                trends.set(key, trend);
-            });
-        }
-    });
-
-    return Array.from(trends.values())
-        .filter(trend => trend.count > 1)
-        .map(trend => ({
-            ...trend,
-            topics: Array.from(trend.topics),
-            articles: Array.from(trend.articles)
-        }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 8); // Limit to top 8 trends
-}
-
-function extractEntities(article) {
-    const entities = new Set();
-    const text = `${article.title} ${article.description || ''}`;
-
-    // Pattern matching for various entity types
-    const patterns = [
-        // Named entities (people, companies, etc.)
-        /[A-Z][a-z]+ (?:[A-Z][a-z]+ )*[A-Z][a-z]+/g,
-        // Product names
-        /(?:[A-Z][a-zA-Z0-9]*[0-9]+|[A-Z]{2,}(?:\s+[0-9]+)?)/g,
-        // Hashtag-style terms
-        /#[A-Za-z][A-Za-z0-9]+/g
-    ];
-
-    patterns.forEach(pattern => {
-        const matches = text.match(pattern) || [];
-        matches.forEach(match => {
-            if (match.length > 3 && !match.includes('The') && !match.includes('And')) {
-                entities.add({ text: match.trim() });
+    // Navigation handlers
+    document.querySelectorAll('.nav-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const feed = button.dataset.feed;
+            if (feed) {
+                switchFeed(feed);
+                document.querySelectorAll('.nav-button').forEach(btn => 
+                    btn.classList.toggle('active', btn === button));
             }
         });
     });
-
-    return Array.from(entities);
 }
 
-function updateTrendingSidebar(trends) {
-    const container = document.getElementById('trendingContainer');
-    if (!container) return;
+// Initial content loading
+async function loadInitialContent() {
+    state.loading = true;
+    updateLoadingState();
 
-    if (!trends.length) {
-        container.innerHTML = '<div class="loading">Analyzing trends...</div>';
+    try {
+        await loadFeeds();
+        if (state.articles.length === 0) {
+            throw new Error('No articles available');
+        }
+        updateDisplay();
+        updateTrending();
+    } catch (error) {
+        console.error('Content loading error:', error);
+        throw error;
+    } finally {
+        state.loading = false;
+        updateLoadingState();
+    }
+}
+
+// Update loading state
+function updateLoadingState() {
+    const articleGrid = document.getElementById('articleGrid');
+    if (!articleGrid) return;
+
+    if (state.loading && state.articles.length === 0) {
+        articleGrid.innerHTML = '<div class="loading">Loading articles...</div>';
+    }
+}
+
+// Show error message
+function showError(message) {
+    const articleGrid = document.getElementById('articleGrid');
+    if (articleGrid) {
+        articleGrid.innerHTML = `
+            <div class="error">
+                ${message}
+                <button onclick="initializeApp()" class="retry-button">Retry</button>
+            </div>
+        `;
+    }
+}
+
+// Feed management
+async function loadFeeds() {
+    try {
+        const feedPromises = Object.entries(feeds).map(async ([topic, url]) => {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                return (data.items || []).map(item => ({ ...item, topic }));
+            } catch (error) {
+                console.error(`Error fetching ${topic} feed:`, error);
+                return [];
+            }
+        });
+
+        const results = await Promise.allSettled(feedPromises);
+        const newArticles = results
+            .filter(result => result.status === 'fulfilled')
+            .map(result => result.value)
+            .flat();
+
+        state.articles = newArticles;
+    } catch (error) {
+        console.error('Error loading feeds:', error);
+        throw error;
+    }
+}
+
+// Display updates
+function updateDisplay() {
+    const articleGrid = document.getElementById('articleGrid');
+    if (!articleGrid) return;
+
+    let articles = [...state.articles];
+
+    if (state.currentFeed !== 'all') {
+        articles = articles.filter(article => article.topic === state.currentFeed);
+    }
+
+    if (state.searchQuery) {
+        const query = state.searchQuery.toLowerCase();
+        articles = articles.filter(article => 
+            article.title.toLowerCase().includes(query) ||
+            (article.description || '').toLowerCase().includes(query)
+        );
+    }
+
+    articles.sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
+
+    if (articles.length === 0) {
+        articleGrid.innerHTML = '<div class="no-results">No articles found</div>';
         return;
     }
 
-    container.innerHTML = trends.map(trend => `
-        <div class="trending-item" onclick="searchKeyword('${trend.text}')">
-            <div class="trending-keyword">${trend.text}</div>
-            <div class="trending-meta">
-                <div>${trend.count} mentions in ${trend.topics.length} ${trend.topics.length === 1 ? 'topic' : 'topics'}</div>
-                <div class="topic-badges">
-                    ${trend.topics.map(topic => 
-                        `<span class="topic-badge">${topic.charAt(0).toUpperCase() + topic.slice(1)}</span>`
-                    ).join('')}
+    articleGrid.innerHTML = articles.map(article => `
+        <article class="article-card" onclick="window.open('${article.url}', '_blank')">
+            ${article.image ? `
+                <img src="${article.image}" 
+                     alt="${article.title}" 
+                     class="article-image"
+                     onerror="this.style.display='none'">
+            ` : ''}
+            <div class="article-content">
+                <h2 class="article-title">${article.title}</h2>
+                <div class="article-meta">
+                    <span>${new Date(article.date_published).toLocaleDateString()}</span>
+                    <span class="topic-badge">${article.topic.charAt(0).toUpperCase() + article.topic.slice(1)}</span>
                 </div>
             </div>
-        </div>
+        </article>
     `).join('');
 }
 
-function updateTicker(trends) {
-    const ticker = document.getElementById('tickerContent');
-    if (!ticker || !trends.length) return;
-
-    // Create ticker content with proper spacing and formatting
-    const content = trends.map(trend => 
-        `<span class="ticker-item" onclick="searchKeyword('${trend.text}')">` +
-        `${trend.text} (${trend.count})` +
-        '</span>'
-    ).join(' • ');
-
-    // Duplicate content for seamless loop
-    ticker.innerHTML = `${content} • ${content} • ${content}`;
-    
-    // Reset animation
-    ticker.style.animation = 'none';
-    ticker.offsetHeight; // Force reflow
-    ticker.style.animation = 'tickerScroll 30s linear infinite';
+// Navigation
+function switchFeed(feed) {
+    state.currentFeed = feed;
+    updateDisplay();
 }
 
-// Rest of the code remains unchanged...
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
+
+// Auto-refresh content
+setInterval(() => {
+    if (window.SPILL.initialized) {
+        loadFeeds().then(() => {
+            updateDisplay();
+            updateTrending();
+        }).catch(console.error);
+    }
+}, 5 * 60 * 1000); // Every 5 minutes

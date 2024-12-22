@@ -4,20 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPILL</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Minimal inline styles for initial loading state -->
+    <!-- Base styles -->
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #0a0a0a;
-            color: #ffffff;
-            font-family: -apple-system, system-ui, sans-serif;
-        }
+        body { margin: 0; padding: 0; background: #0a0a0a; color: #fff; }
+        .loading { text-align: center; padding: 2rem; color: #888; }
     </style>
+    <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-content">
             <a href="./" class="logo">SPILL</a>
@@ -31,7 +25,6 @@
         </div>
     </header>
 
-    <!-- Navigation -->
     <nav class="navigation">
         <div class="nav-content">
             <button class="nav-button active" data-feed="all">All News</button>
@@ -48,25 +41,19 @@
         </div>
     </nav>
 
-    <!-- Trending Ticker -->
     <div class="ticker-container">
         <div class="ticker-label">🔥 TRENDING</div>
         <div class="ticker-scroll">
-            <div class="ticker-content" id="tickerContent">
-                <!-- Ticker items will be dynamically added here -->
-            </div>
+            <div class="ticker-content" id="tickerContent"></div>
         </div>
     </div>
 
-    <!-- Main Content -->
     <main class="content-container">
         <div class="content-grid">
-            <!-- Articles -->
             <div class="article-grid" id="articleGrid">
                 <div class="loading">Loading articles...</div>
             </div>
 
-            <!-- Trending Sidebar -->
             <aside class="trending-sidebar">
                 <h2 class="trending-title">Trending Topics</h2>
                 <div id="trendingContainer" class="trending-container">
@@ -76,8 +63,16 @@
         </div>
     </main>
 
-    <!-- Scripts -->
-    <script src="weather.js"></script>
-    <script src="app.js"></script>
+    <!-- Load scripts at end of body -->
+    <script type="text/javascript">
+        // Initialize app state
+        window.SPILL = {
+            initialized: false,
+            loaded: false,
+            error: null
+        };
+    </script>
+    <script src="./weather.js"></script>
+    <script src="./app.js"></script>
 </body>
 </html>
