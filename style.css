@@ -7,9 +7,15 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
-    padding: 20px;
-    max-width: 1200px;
+    max-width: 100vw;
+    overflow-x: hidden;
+    background: #fff;
+}
+
+.container {
+    max-width: 1600px;
     margin: 0 auto;
+    padding: 20px;
 }
 
 header {
@@ -27,6 +33,7 @@ input {
     margin-bottom: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
+    font-size: 16px;
 }
 
 #weatherDisplay {
@@ -34,27 +41,89 @@ input {
     color: #666;
 }
 
+/* Three-column layout */
+main {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
 section {
     margin-bottom: 40px;
+}
+
+/* Left column */
+.quick-links {
+    position: sticky;
+    top: 20px;
+}
+
+/* Center column - articles */
+.articles-section {
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+    padding: 0 40px;
+}
+
+/* Right column - trends */
+.trends-section {
+    position: sticky;
+    top: 20px;
 }
 
 h2 {
     font-size: 24px;
     margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-#articlesList, #trendsList {
+#articlesList {
     min-height: 100px;
 }
 
 .article {
-    padding: 15px 0;
+    padding: 20px 0;
     border-bottom: 1px solid #eee;
 }
 
+.article h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.article p {
+    color: #666;
+    margin-bottom: 10px;
+}
+
 .trend {
-    padding: 10px 0;
+    padding: 15px 0;
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid #eee;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    main {
+        grid-template-columns: 1fr 2fr;
+    }
+    .quick-links {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    main {
+        grid-template-columns: 1fr;
+    }
+    .articles-section {
+        border: none;
+        padding: 0;
+    }
+    .trends-section {
+        position: static;
+    }
 }
