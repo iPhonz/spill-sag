@@ -1,3 +1,6 @@
+// Simulate network delay
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 // Sample trend data
 const sampleTrends = [
     { title: 'Trend 1', count: '10K' },
@@ -7,12 +10,13 @@ const sampleTrends = [
 export const trendService = {
     // Get trending topics
     getTrends: async () => {
-        try {
-            // Simulated API call
-            return Promise.resolve(sampleTrends);
-        } catch (error) {
-            console.error('Error fetching trends:', error);
-            return [];
+        await delay(800); // Simulate network delay
+
+        // Simulate occasional errors
+        if (Math.random() < 0.1) {
+            throw new Error('Failed to fetch trends');
         }
+
+        return sampleTrends;
     }
 };

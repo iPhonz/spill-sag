@@ -1,3 +1,6 @@
+// Simulate network delay
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 // Sample article data
 const sampleArticles = [
     { title: 'Sample Article 1', excerpt: 'This is a sample article excerpt...' },
@@ -7,26 +10,28 @@ const sampleArticles = [
 export const articleService = {
     // Get all articles
     getArticles: async () => {
-        try {
-            // Simulated API call
-            return Promise.resolve(sampleArticles);
-        } catch (error) {
-            console.error('Error fetching articles:', error);
-            return [];
+        await delay(1000); // Simulate network delay
+        
+        // Simulate occasional errors
+        if (Math.random() < 0.1) {
+            throw new Error('Failed to fetch articles');
         }
+
+        return sampleArticles;
     },
 
     // Search articles
     searchArticles: async (searchTerm) => {
-        try {
-            const articles = await articleService.getArticles();
-            return articles.filter(article =>
-                article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                article.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        } catch (error) {
-            console.error('Error searching articles:', error);
-            return [];
+        await delay(500); // Simulate network delay
+
+        // Simulate occasional errors
+        if (Math.random() < 0.1) {
+            throw new Error('Search failed');
         }
+
+        return sampleArticles.filter(article =>
+            article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            article.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+        );
     }
 };
