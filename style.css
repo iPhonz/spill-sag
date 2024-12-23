@@ -1,3 +1,4 @@
+/* Reset and base styles */
 * {
     margin: 0;
     padding: 0;
@@ -7,32 +8,36 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
-    max-width: 100vw;
-    overflow-x: hidden;
-    background: #fff;
+    background-color: #ffffff;
+    color: #000000;
 }
 
 .container {
-    max-width: 1600px;
+    max-width: 1440px;
     margin: 0 auto;
     padding: 20px;
 }
 
+/* Header styles */
 header {
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 h1 {
     font-size: 48px;
+    font-weight: bold;
     margin-bottom: 20px;
 }
 
-input {
+.search-bar {
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
+    padding: 12px;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 16px;
 }
 
@@ -44,73 +49,88 @@ input {
 /* Three-column layout */
 main {
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 250px 1fr 300px;
     gap: 40px;
     align-items: start;
 }
 
-section {
-    margin-bottom: 40px;
-}
-
-/* Left column */
-.quick-links {
+/* Left sidebar */
+.sidebar-left {
     position: sticky;
     top: 20px;
 }
 
-/* Center column - articles */
-.articles-section {
+.quick-links {
+    list-style: none;
+}
+
+.quick-links li {
+    margin-bottom: 15px;
+}
+
+.quick-links a {
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+}
+
+/* Main content area */
+.main-content {
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
-    padding: 0 40px;
+    padding: 0 30px;
 }
 
-/* Right column - trends */
-.trends-section {
+.articles-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Right sidebar */
+.sidebar-right {
     position: sticky;
     top: 20px;
 }
 
-h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+.trends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-#articlesList {
-    min-height: 100px;
-}
-
-.article {
+/* Article and trend items */
+.article-item {
     padding: 20px 0;
     border-bottom: 1px solid #eee;
 }
 
-.article h3 {
+.article-title {
     font-size: 20px;
+    font-weight: bold;
     margin-bottom: 10px;
 }
 
-.article p {
+.article-excerpt {
     color: #666;
+    font-size: 16px;
     margin-bottom: 10px;
 }
 
-.trend {
-    padding: 15px 0;
+.trend-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid #eee;
+    align-items: center;
 }
 
-/* Responsive design */
+/* Responsive adjustments */
 @media (max-width: 1200px) {
     main {
-        grid-template-columns: 1fr 2fr;
+        grid-template-columns: 1fr 300px;
     }
-    .quick-links {
+    .sidebar-left {
         display: none;
     }
 }
@@ -119,11 +139,11 @@ h2 {
     main {
         grid-template-columns: 1fr;
     }
-    .articles-section {
+    .sidebar-right {
+        display: none;
+    }
+    .main-content {
         border: none;
         padding: 0;
-    }
-    .trends-section {
-        position: static;
     }
 }

@@ -10,20 +10,32 @@
     <div class="container">
         <header>
             <h1>SPILL</h1>
-            <input type="text" id="searchInput" placeholder="Search articles...">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search articles...">
+            </div>
             <div id="weatherDisplay">--°F</div>
         </header>
 
         <main>
-            <section>
+            <aside class="sidebar-left">
+                <nav>
+                    <ul class="quick-links">
+                        <li><a href="#">Latest News</a></li>
+                        <li><a href="#">Popular</a></li>
+                        <li><a href="#">Most Read</a></li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <section class="main-content">
                 <h2>TRENDING</h2>
-                <div id="articlesList"></div>
+                <div id="articlesList" class="articles-grid"></div>
             </section>
 
-            <section>
+            <aside class="sidebar-right">
                 <h2>Trending Topics</h2>
-                <div id="trendsList"></div>
-            </section>
+                <div id="trendsList" class="trends-list"></div>
+            </aside>
         </main>
     </div>
     <script src="app.js"></script>
