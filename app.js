@@ -1,8 +1,8 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     // Cache DOM elements
-    const articles = document.getElementById('articles');
-    const trends = document.getElementById('trends');
-    const search = document.getElementById('search');
+    const articlesContainer = document.getElementById('articles');
+    const trendsContainer = document.getElementById('trends');
+    const searchInput = document.getElementById('search');
 
     // Sample data
     const data = {
@@ -16,9 +16,23 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
+    // Render initial content
+    renderArticles(data.articles);
+    renderTrends(data.trends);
+
+    // Add search handler
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredArticles = data.articles.filter(article =>
+            article.title.toLowerCase().includes(searchTerm) ||
+            article.excerpt.toLowerCase().includes(searchTerm)
+        );
+        renderArticles(filteredArticles);
+    });
+
     // Render functions
-    function renderArticles(items) {
-        articles.innerHTML = items.map(article => `
+    function renderArticles(articles) {
+        articlesContainer.innerHTML = articles.map(article => `
             <div class="article">
                 <h3>${article.title}</h3>
                 <p>${article.excerpt}</p>
@@ -26,26 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
-    function renderTrends(items) {
-        trends.innerHTML = items.map(trend => `
+    function renderTrends(trends) {
+        trendsContainer.innerHTML = trends.map(trend => `
             <div class="trend">
                 <span>${trend.title}</span>
                 <span>${trend.count}</span>
             </div>
         `).join('');
     }
-
-    // Search handler
-    search.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const filtered = data.articles.filter(article =>
-            article.title.toLowerCase().includes(term) ||
-            article.excerpt.toLowerCase().includes(term)
-        );
-        renderArticles(filtered);
-    });
-
-    // Initial render
-    renderArticles(data.articles);
-    renderTrends(data.trends);
 });
