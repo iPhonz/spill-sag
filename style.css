@@ -1,0 +1,145 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.5;
+    color: #000;
+    background: #fff;
+}
+
+.app-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.logo {
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+}
+
+.weather-display {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr 300px;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+/* Sidebar styles */
+.sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+.nav-links {
+    list-style: none;
+}
+
+.nav-links li {
+    margin-bottom: 15px;
+}
+
+.nav-links a {
+    color: #333;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+/* Main content styles */
+.main-content {
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+    padding: 0 40px;
+}
+
+.main-content h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.articles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.article {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.article h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.article p {
+    color: #666;
+}
+
+/* Trending section styles */
+.trending h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.trends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.trend {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+    .content-grid {
+        grid-template-columns: 1fr 300px;
+    }
+    .sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    .trending {
+        display: none;
+    }
+    .main-content {
+        border: none;
+        padding: 0;
+    }
+}
