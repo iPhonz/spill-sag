@@ -13,7 +13,7 @@
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Search articles..." class="search-input">
             </div>
-            <div id="weatherDisplay">72°F</div>
+            <div id="weatherDisplay" class="weather-display">72°F</div>
         </header>
 
         <div class="content-grid">
@@ -27,34 +27,24 @@
 
             <main class="main-content">
                 <h2>TRENDING</h2>
-                <div id="articlesList" class="articles-list">
-                    <article class="article">
-                        <h3>Sample Article 1</h3>
-                        <p>This is a sample article excerpt...</p>
-                    </article>
-                    <article class="article">
-                        <h3>Sample Article 2</h3>
-                        <p>Another sample article excerpt...</p>
-                    </article>
+                <div id="articlesList" class="articles-list content-container">
+                    <div class="loading-container">
+                        <div class="loading-spinner"></div>
+                    </div>
                 </div>
             </main>
 
             <aside class="trending">
                 <h2>Trending Topics</h2>
-                <div id="trendsList" class="trends-list">
-                    <div class="trend">
-                        <span>Trend 1</span>
-                        <span>10K</span>
-                    </div>
-                    <div class="trend">
-                        <span>Trend 2</span>
-                        <span>5K</span>
+                <div id="trendsList" class="trends-list content-container">
+                    <div class="loading-container">
+                        <div class="loading-spinner"></div>
                     </div>
                 </div>
             </aside>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
