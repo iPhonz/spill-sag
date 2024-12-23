@@ -1,4 +1,3 @@
-/* Reset and base styles */
 * {
     margin: 0;
     padding: 0;
@@ -6,10 +5,10 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    line-height: 1.6;
-    background-color: #ffffff;
-    color: #000000;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.5;
+    color: #000;
+    background: #fff;
 }
 
 .container {
@@ -18,9 +17,8 @@ body {
     padding: 20px;
 }
 
-/* Header styles */
 header {
-    margin-bottom: 30px;
+    margin-bottom: 40px;
 }
 
 h1 {
@@ -29,121 +27,120 @@ h1 {
     margin-bottom: 20px;
 }
 
-.search-bar {
+.search-container {
     margin-bottom: 20px;
 }
 
-input[type="text"] {
+.search-input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
     font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
 }
 
 #weatherDisplay {
     font-size: 16px;
     color: #666;
+    margin-bottom: 20px;
 }
 
-/* Three-column layout */
-main {
+.content-grid {
     display: grid;
-    grid-template-columns: 250px 1fr 300px;
+    grid-template-columns: 200px 1fr 300px;
     gap: 40px;
-    align-items: start;
 }
 
-/* Left sidebar */
-.sidebar-left {
+/* Sidebar styles */
+.sidebar {
     position: sticky;
     top: 20px;
 }
 
-.quick-links {
+.nav-links {
     list-style: none;
 }
 
-.quick-links li {
+.nav-links li {
     margin-bottom: 15px;
 }
 
-.quick-links a {
-    text-decoration: none;
+.nav-links a {
     color: #333;
+    text-decoration: none;
     font-size: 16px;
 }
 
-/* Main content area */
+/* Main content styles */
 .main-content {
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
-    padding: 0 30px;
+    padding: 0 40px;
 }
 
-.articles-grid {
+h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.articles-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
 }
 
-/* Right sidebar */
-.sidebar-right {
-    position: sticky;
-    top: 20px;
+.article {
+    padding-bottom: 30px;
+    border-bottom: 1px solid #eee;
 }
 
+.article h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.article p {
+    color: #666;
+}
+
+/* Trending section styles */
 .trends-list {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-/* Article and trend items */
-.article-item {
-    padding: 20px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.article-title {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.article-excerpt {
-    color: #666;
-    font-size: 16px;
-    margin-bottom: 10px;
-}
-
-.trend-item {
-    padding: 12px 0;
-    border-bottom: 1px solid #eee;
+.trend {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
 }
 
-/* Responsive adjustments */
+/* Responsive styles */
 @media (max-width: 1200px) {
-    main {
+    .content-grid {
         grid-template-columns: 1fr 300px;
     }
-    .sidebar-left {
+    .sidebar {
         display: none;
     }
 }
 
 @media (max-width: 768px) {
-    main {
+    .content-grid {
         grid-template-columns: 1fr;
     }
-    .sidebar-right {
+    .trending {
         display: none;
     }
     .main-content {
         border: none;
         padding: 0;
+    }
+    h1 {
+        font-size: 36px;
     }
 }

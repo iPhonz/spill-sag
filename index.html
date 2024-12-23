@@ -10,34 +10,51 @@
     <div class="container">
         <header>
             <h1>SPILL</h1>
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Search articles...">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search articles..." class="search-input">
             </div>
-            <div id="weatherDisplay">--°F</div>
+            <div id="weatherDisplay">72°F</div>
         </header>
 
-        <main>
-            <aside class="sidebar-left">
-                <nav>
-                    <ul class="quick-links">
-                        <li><a href="#">Latest News</a></li>
-                        <li><a href="#">Popular</a></li>
-                        <li><a href="#">Most Read</a></li>
-                    </ul>
-                </nav>
-            </aside>
+        <div class="content-grid">
+            <nav class="sidebar">
+                <ul class="nav-links">
+                    <li><a href="#">Latest News</a></li>
+                    <li><a href="#">Popular</a></li>
+                    <li><a href="#">Most Read</a></li>
+                </ul>
+            </nav>
 
-            <section class="main-content">
+            <main class="main-content">
                 <h2>TRENDING</h2>
-                <div id="articlesList" class="articles-grid"></div>
-            </section>
+                <div id="articlesList" class="articles-list">
+                    <article class="article">
+                        <h3>Sample Article 1</h3>
+                        <p>This is a sample article excerpt...</p>
+                    </article>
+                    <article class="article">
+                        <h3>Sample Article 2</h3>
+                        <p>Another sample article excerpt...</p>
+                    </article>
+                </div>
+            </main>
 
-            <aside class="sidebar-right">
+            <aside class="trending">
                 <h2>Trending Topics</h2>
-                <div id="trendsList" class="trends-list"></div>
+                <div id="trendsList" class="trends-list">
+                    <div class="trend">
+                        <span>Trend 1</span>
+                        <span>10K</span>
+                    </div>
+                    <div class="trend">
+                        <span>Trend 2</span>
+                        <span>5K</span>
+                    </div>
+                </div>
             </aside>
-        </main>
+        </div>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
