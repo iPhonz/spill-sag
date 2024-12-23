@@ -4,57 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPILL</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 1400px; margin: 0 auto; }
+        #root { display: grid; grid-template-columns: 200px 1fr 300px; gap: 40px; }
+        .logo { font-size: 48px; font-weight: 900; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; }
+        #weather { margin-bottom: 40px; color: #666; }
+        nav a { display: block; color: inherit; text-decoration: none; margin-bottom: 15px; }
+        main { border-left: 1px solid #ddd; border-right: 1px solid #ddd; padding: 0 40px; }
+        .article { padding: 20px 0; border-bottom: 1px solid #eee; }
+        .article h3 { margin-bottom: 10px; }
+        .article p { color: #666; }
+        .trend { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
+        @media (max-width: 1200px) { #root { grid-template-columns: 1fr 300px; } nav { display: none; } }
+        @media (max-width: 768px) { #root { grid-template-columns: 1fr; } aside { display: none; } main { border: none; padding: 0; } }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>SPILL</h1>
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Search articles..." class="search-input">
-            </div>
-            <div id="weatherDisplay">72°F</div>
-        </header>
+    <header>
+        <div class="logo">SPILL</div>
+        <input type="text" id="search" placeholder="Search articles...">
+        <div id="weather">72°F</div>
+    </header>
 
-        <div class="content-grid">
-            <nav class="sidebar">
-                <ul class="nav-links">
-                    <li><a href="#">Latest News</a></li>
-                    <li><a href="#">Popular</a></li>
-                    <li><a href="#">Most Read</a></li>
-                </ul>
-            </nav>
+    <div id="root">
+        <nav>
+            <a href="#">Latest News</a>
+            <a href="#">Popular</a>
+            <a href="#">Most Read</a>
+        </nav>
 
-            <main class="main-content">
-                <h2>TRENDING</h2>
-                <div id="articlesList" class="articles-list">
-                    <article class="article">
-                        <h3>Sample Article 1</h3>
-                        <p>This is a sample article excerpt...</p>
-                    </article>
-                    <article class="article">
-                        <h3>Sample Article 2</h3>
-                        <p>Another sample article excerpt...</p>
-                    </article>
-                </div>
-            </main>
+        <main>
+            <h2>TRENDING</h2>
+            <div id="articles"></div>
+        </main>
 
-            <aside class="trending">
-                <h2>Trending Topics</h2>
-                <div id="trendsList" class="trends-list">
-                    <div class="trend">
-                        <span>Trend 1</span>
-                        <span>10K</span>
-                    </div>
-                    <div class="trend">
-                        <span>Trend 2</span>
-                        <span>5K</span>
-                    </div>
-                </div>
-            </aside>
-        </div>
+        <aside>
+            <h2>Trending Topics</h2>
+            <div id="trends"></div>
+        </aside>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        // Sample data
+        const data = {
+            articles: [
+                { title: 'Sample Article 1', excerpt: 'This is a sample article excerpt...' },
+                { title: 'Sample Article 2', excerpt: 'Another sample article excerpt...' }
+            ],
+            trends: [
+                { title: 'Trend 1', count: '10K' },
+                { title: 'Trend 2', count: '5K' }
+            ]
+        };
+
+        // Render functions
+        function renderArticles() {
+            document.getElementById('articles').innerHTML = data.articles
+                .map(article => `
+                    <div class="article">
+                        <h3>${article.title}</h3>
+                        <p>${article.excerpt}</p>
+                    </div>
+                `).join('');
+        }
+
+        function renderTrends() {
+            document.getElementById('trends').innerHTML = data.trends
+                .map(trend => `
+                    <div class="trend">
+                        <span>${trend.title}</span>
+                        <span>${trend.count}</span>
+                    </div>
+                `).join('');
+        }
+
+        // Search handler
+        document.getElementById('search').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            data.articles = [
+                { title: 'Sample Article 1', excerpt: 'This is a sample article excerpt...' },
+                { title: 'Sample Article 2', excerpt: 'Another sample article excerpt...' }
+            ].filter(article => 
+                article.title.toLowerCase().includes(term) ||
+                article.excerpt.toLowerCase().includes(term)
+            );
+            renderArticles();
+        });
+
+        // Initial render
+        renderArticles();
+        renderTrends();
+    </script>
 </body>
 </html>
