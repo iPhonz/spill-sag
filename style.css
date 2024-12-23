@@ -29,11 +29,22 @@ input {
     border: 1px solid #ddd; 
     border-radius: 8px; 
     margin-bottom: 20px; 
+    transition: border-color 0.2s ease;
+}
+
+input:focus {
+    border-color: #666;
+    outline: none;
 }
 
 #weather { 
     margin-bottom: 40px; 
     color: #666; 
+    transition: opacity 0.3s ease;
+}
+
+#weather.loading {
+    opacity: 0.5;
 }
 
 nav a { 
@@ -41,6 +52,11 @@ nav a {
     color: inherit; 
     text-decoration: none; 
     margin-bottom: 15px; 
+    transition: color 0.2s ease;
+}
+
+nav a:hover {
+    color: #666;
 }
 
 main { 
@@ -49,7 +65,25 @@ main {
     padding: 0 40px; 
 }
 
-.article { 
+/* Content States */
+.content-container {
+    position: relative;
+    min-height: 200px;
+    transition: opacity 0.3s ease;
+}
+
+.content-container.loading {
+    opacity: 0.7;
+}
+
+/* Article and Trend Items */
+.article, .trend { 
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 0.3s ease forwards;
+}
+
+.article {
     padding: 20px 0; 
     border-bottom: 1px solid #eee; 
 }
@@ -67,6 +101,7 @@ main {
     justify-content: space-between; 
     padding: 12px 0; 
     border-bottom: 1px solid #eee; 
+    animation-delay: calc(var(--index) * 0.1s);
 }
 
 /* Loading States */
@@ -79,13 +114,15 @@ main {
     border-top-color: #666;
     animation: spin 0.6s linear infinite;
     margin: 20px 0;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
 }
 
 .loading-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
     justify-content: center;
     width: 100%;
@@ -99,6 +136,8 @@ main {
     border-radius: 4px;
     color: #c53030;
     margin: 10px 0;
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
 }
 
 .error-message button {
@@ -109,6 +148,12 @@ main {
     border-radius: 4px;
     color: #c53030;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.error-message button:hover {
+    background: #c53030;
+    color: #fff;
 }
 
 /* Empty States */
@@ -116,8 +161,32 @@ main {
     text-align: center;
     padding: 40px 20px;
     color: #666;
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
 }
 
+/* Animations */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
 @media (max-width: 1200px) { 
     #root { 
         grid-template-columns: 1fr 300px; 
