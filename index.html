@@ -4,22 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPILL</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 1400px; margin: 0 auto; }
-        #root { display: grid; grid-template-columns: 200px 1fr 300px; gap: 40px; }
-        .logo { font-size: 48px; font-weight: 900; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; }
-        #weather { margin-bottom: 40px; color: #666; }
-        nav a { display: block; color: inherit; text-decoration: none; margin-bottom: 15px; }
-        main { border-left: 1px solid #ddd; border-right: 1px solid #ddd; padding: 0 40px; }
-        .article { padding: 20px 0; border-bottom: 1px solid #eee; }
-        .article h3 { margin-bottom: 10px; }
-        .article p { color: #666; }
-        .trend { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
-        @media (max-width: 1200px) { #root { grid-template-columns: 1fr 300px; } nav { display: none; } }
-        @media (max-width: 768px) { #root { grid-template-columns: 1fr; } aside { display: none; } main { border: none; padding: 0; } }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
@@ -46,56 +31,6 @@
         </aside>
     </div>
 
-    <script>
-        // Sample data
-        const data = {
-            articles: [
-                { title: 'Sample Article 1', excerpt: 'This is a sample article excerpt...' },
-                { title: 'Sample Article 2', excerpt: 'Another sample article excerpt...' }
-            ],
-            trends: [
-                { title: 'Trend 1', count: '10K' },
-                { title: 'Trend 2', count: '5K' }
-            ]
-        };
-
-        // Render functions
-        function renderArticles() {
-            document.getElementById('articles').innerHTML = data.articles
-                .map(article => `
-                    <div class="article">
-                        <h3>${article.title}</h3>
-                        <p>${article.excerpt}</p>
-                    </div>
-                `).join('');
-        }
-
-        function renderTrends() {
-            document.getElementById('trends').innerHTML = data.trends
-                .map(trend => `
-                    <div class="trend">
-                        <span>${trend.title}</span>
-                        <span>${trend.count}</span>
-                    </div>
-                `).join('');
-        }
-
-        // Search handler
-        document.getElementById('search').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            data.articles = [
-                { title: 'Sample Article 1', excerpt: 'This is a sample article excerpt...' },
-                { title: 'Sample Article 2', excerpt: 'Another sample article excerpt...' }
-            ].filter(article => 
-                article.title.toLowerCase().includes(term) ||
-                article.excerpt.toLowerCase().includes(term)
-            );
-            renderArticles();
-        });
-
-        // Initial render
-        renderArticles();
-        renderTrends();
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
