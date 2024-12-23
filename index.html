@@ -3,34 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPILL - Trending News</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>SPILL</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="header">
-        <h1 class="logo">SPILL</h1>
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search articles..." class="search-input">
-        </div>
-        <div class="weather-info" id="weatherInfo">--°F</div>
-    </header>
-
-    <main class="main-content">
-        <section class="trending-section">
-            <h2 class="section-title">TRENDING</h2>
-            <div id="articlesContainer" class="articles-container">
-                <div class="loading-spinner" id="articlesSpinner"></div>
+    <div class="container">
+        <header>
+            <h1>SPILL</h1>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search articles...">
             </div>
-        </section>
+            <div id="weatherDisplay">--°F</div>
+        </header>
 
-        <aside class="trending-topics">
-            <h2 class="section-title">Trending Topics</h2>
-            <div id="trendsContainer" class="trends-container">
-                <div class="loading-spinner" id="trendsSpinner"></div>
-            </div>
-        </aside>
-    </main>
+        <main>
+            <aside class="sidebar-left">
+                <nav>
+                    <ul class="quick-links">
+                        <li><a href="#">Latest News</a></li>
+                        <li><a href="#">Popular</a></li>
+                        <li><a href="#">Most Read</a></li>
+                    </ul>
+                </nav>
+            </aside>
 
-    <script type="module" src="js/app.js"></script>
+            <section class="main-content">
+                <h2>TRENDING</h2>
+                <div id="articlesList" class="articles-grid"></div>
+            </section>
+
+            <aside class="sidebar-right">
+                <h2>Trending Topics</h2>
+                <div id="trendsList" class="trends-list"></div>
+            </aside>
+        </main>
+    </div>
+    <script src="app.js"></script>
 </body>
 </html>

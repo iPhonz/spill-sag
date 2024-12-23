@@ -1,0 +1,149 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header styles */
+header {
+    margin-bottom: 30px;
+}
+
+h1 {
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.search-bar {
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+#weatherDisplay {
+    font-size: 16px;
+    color: #666;
+}
+
+/* Three-column layout */
+main {
+    display: grid;
+    grid-template-columns: 250px 1fr 300px;
+    gap: 40px;
+    align-items: start;
+}
+
+/* Left sidebar */
+.sidebar-left {
+    position: sticky;
+    top: 20px;
+}
+
+.quick-links {
+    list-style: none;
+}
+
+.quick-links li {
+    margin-bottom: 15px;
+}
+
+.quick-links a {
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+}
+
+/* Main content area */
+.main-content {
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+    padding: 0 30px;
+}
+
+.articles-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Right sidebar */
+.sidebar-right {
+    position: sticky;
+    top: 20px;
+}
+
+.trends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Article and trend items */
+.article-item {
+    padding: 20px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.article-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.article-excerpt {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.trend-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    main {
+        grid-template-columns: 1fr 300px;
+    }
+    .sidebar-left {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    main {
+        grid-template-columns: 1fr;
+    }
+    .sidebar-right {
+        display: none;
+    }
+    .main-content {
+        border: none;
+        padding: 0;
+    }
+}
