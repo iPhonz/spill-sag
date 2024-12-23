@@ -1,18 +1,16 @@
-// Sample data
-const data = {
-    articles: [
-        { title: 'Sample Article 1', excerpt: 'This is a sample article excerpt...' },
-        { title: 'Sample Article 2', excerpt: 'Another sample article excerpt...' }
-    ],
-    trends: [
-        { title: 'Trend 1', count: '10K' },
-        { title: 'Trend 2', count: '5K' }
-    ]
-};
+import { articleService } from './services/articleService.js';
+import { trendService } from './services/trendService.js';
+import { weatherService } from './services/weatherService.js';
+
+// Cache DOM elements
+const articlesContainer = document.getElementById('articles');
+const trendsContainer = document.getElementById('trends');
+const weatherDisplay = document.getElementById('weather');
+const searchInput = document.getElementById('search');
 
 // Render functions
-function renderArticles() {
-    document.getElementById('articles').innerHTML = data.articles
+function renderArticles(articles) {
+    articlesContainer.innerHTML = articles
         .map(article => `
             <div class="article">
                 <h3>${article.title}</h3>
@@ -21,8 +19,8 @@ function renderArticles() {
         `).join('');
 }
 
-function renderTrends() {
-    document.getElementById('trends').innerHTML = data.trends
+function renderTrends(trends) {
+    trendsContainer.innerHTML = trends
         .map(trend => `
             <div class="trend">
                 <span>${trend.title}</span>
@@ -31,21 +29,38 @@ function renderTrends() {
         `).join('');
 }
 
-// Search handler
-document.getElementById('search').addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
-    data.articles = [
-        { title: 'Sample Article 1', excerpt: 'This is a sample article excerpt...' },
-        { title: 'Sample Article 2', excerpt: 'Another sample article excerpt...' }
-    ].filter(article => 
-        article.title.toLowerCase().includes(term) ||
-        article.excerpt.toLowerCase().includes(term)
-    );
-    renderArticles();
-});
+function renderWeather(weather) {
+    weatherDisplay.textContent = `${weather.temperature}°${weather.unit}`;
+}
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    renderArticles();
-    renderTrends();
-});
+// Event handlers
+async function handleSearch(e) {
+    const searchTerm = e.target.value;
+    const articles = await articleService.searchArticles(searchTerm);
+    renderArticles(articles);
+}
+
+// Initialize data
+async function initializeApp() {
+    try {
+        // Fetch initial data
+        const [articles, trends, weather] = await Promise.all([
+            articleService.getArticles(),
+            trendService.getTrends(),
+            weatherService.getWeather()
+        ]);
+
+        // Render all content
+        renderArticles(articles);
+        renderTrends(trends);
+        renderWeather(weather);
+
+        // Set up event listeners
+        searchInput.addEventListener('input', handleSearch);
+    } catch (error) {
+        console.error('Error initializing app:', error);
+    }
+}
+
+// Start the app when DOM is ready
+document.addEventListener('DOMContentLoaded', initializeApp);
