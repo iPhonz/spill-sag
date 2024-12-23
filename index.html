@@ -7,44 +7,31 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <div id="root">
         <header>
             <h1>SPILL</h1>
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Search articles..." class="search-input">
-            </div>
-            <div id="weatherDisplay" class="weather-display">72°F</div>
+            <input type="text" id="search" placeholder="Search articles...">
+            <div id="weather">72°F</div>
         </header>
 
-        <div class="content-grid">
-            <nav class="sidebar">
-                <ul class="nav-links">
-                    <li><a href="#">Latest News</a></li>
-                    <li><a href="#">Popular</a></li>
-                    <li><a href="#">Most Read</a></li>
-                </ul>
+        <div class="layout">
+            <nav>
+                <a href="#">Latest News</a>
+                <a href="#">Popular</a>
+                <a href="#">Most Read</a>
             </nav>
 
-            <main class="main-content">
+            <main>
                 <h2>TRENDING</h2>
-                <div id="articlesList" class="articles-list content-container">
-                    <div class="loading-container">
-                        <div class="loading-spinner"></div>
-                    </div>
-                </div>
+                <div id="articles"></div>
             </main>
 
-            <aside class="trending">
+            <aside>
                 <h2>Trending Topics</h2>
-                <div id="trendsList" class="trends-list content-container">
-                    <div class="loading-container">
-                        <div class="loading-spinner"></div>
-                    </div>
-                </div>
+                <div id="trends"></div>
             </aside>
         </div>
     </div>
-
-    <script type="module" src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
