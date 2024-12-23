@@ -1,53 +1,47 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Cache DOM elements
-    const searchInput = document.getElementById('searchInput');
-    const articlesList = document.getElementById('articlesList');
-    const trendsList = document.getElementById('trendsList');
+    const articlesContainer = document.getElementById('articles');
+    const trendsContainer = document.getElementById('trends');
+    const searchInput = document.getElementById('search');
 
     // Sample data
-    const articles = [
-        {
-            title: 'Sample Article 1',
-            excerpt: 'This is a sample article excerpt...'
-        },
-        {
-            title: 'Sample Article 2',
-            excerpt: 'Another sample article excerpt...'
-        }
-    ];
+    const data = {
+        articles: [
+            { title: 'Sample Article 1', excerpt: 'This is a sample article excerpt...' },
+            { title: 'Sample Article 2', excerpt: 'Another sample article excerpt...' }
+        ],
+        trends: [
+            { title: 'Trend 1', count: '10K' },
+            { title: 'Trend 2', count: '5K' }
+        ]
+    };
 
-    const trends = [
-        { title: 'Trend 1', count: '10K' },
-        { title: 'Trend 2', count: '5K' }
-    ];
+    // Render initial content
+    renderArticles(data.articles);
+    renderTrends(data.trends);
 
-    // Initial render
-    renderArticles(articles);
-    renderTrends(trends);
-
-    // Event handlers
-    searchInput.addEventListener('input', handleSearch);
-
-    function handleSearch(e) {
+    // Add search handler
+    searchInput.addEventListener('input', function(e) {
         const searchTerm = e.target.value.toLowerCase();
-        const filteredArticles = articles.filter(article =>
+        const filteredArticles = data.articles.filter(article =>
             article.title.toLowerCase().includes(searchTerm) ||
             article.excerpt.toLowerCase().includes(searchTerm)
         );
         renderArticles(filteredArticles);
-    }
+    });
 
+    // Render functions
     function renderArticles(articles) {
-        articlesList.innerHTML = articles.map(article => `
-            <article class="article">
+        articlesContainer.innerHTML = articles.map(article => `
+            <div class="article">
                 <h3>${article.title}</h3>
                 <p>${article.excerpt}</p>
-            </article>
+            </div>
         `).join('');
     }
 
     function renderTrends(trends) {
-        trendsList.innerHTML = trends.map(trend => `
+        trendsContainer.innerHTML = trends.map(trend => `
             <div class="trend">
                 <span>${trend.title}</span>
                 <span>${trend.count}</span>
