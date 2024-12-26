@@ -1,59 +1,76 @@
-export function initTrending() {
-    initTrendingArticles();
-    initTrendingTopics();
+import { RSS_FEEDS } from './config.js';
+
+export async function initTrending() {
+    try {
+        const articles = await fetchTrendingArticles();
+        const topics = aggregateTopics(articles);
+        renderTrendingArticles(articles);
+        renderTrendingTopics(topics);
+    } catch (error) {
+        console.error('Error initializing trending content:', error);
+    }
 }
 
-function initTrendingArticles() {
-    const articles = [
-        {
-            title: 'Sample Article 1',
-            excerpt: 'This is a sample article excerpt...'
-        },
-        {
-            title: 'Sample Article 2',
-            excerpt: 'Another sample article excerpt...'
-        }
-    ];
+async function fetchTrendingArticles() {
+    const feeds = Object.values(RSS_FEEDS);
+    const articles = await Promise.all(
+        feeds.map(async (feed) => {
+            const response = await fetch(feed);
+            const data = await response.json();
+            return data.items.map(item => ({
+                title: item.title,
+                excerpt: item.description,
+                link: item.url,
+                category: item.categories?.[0] || '',
+                date: new Date(item.date_published)
+            }));
+        })
+    );
+    return articles.flat().sort((a, b) => b.date - a.date).slice(0, 10);
+}
 
+function aggregateTopics(articles) {
+    const topicCount = articles.reduce((acc, article) => {
+        acc[article.category] = (acc[article.category] || 0) + 1;
+        return acc;
+    }, {});
+
+    return Object.entries(topicCount)
+        .map(([name, count]) => ({ 
+            name, 
+            count: formatCount(count * 1000) // Simulated engagement metrics
+        }))
+        .sort((a, b) => parseInt(b.count) - parseInt(a.count));
+}
+
+function formatCount(num) {
+    return num > 999 ? `${(num/1000).toFixed(1)}K` : num;
+}
+
+function renderTrendingArticles(articles) {
     const container = document.getElementById('trending-articles');
-    if (container) {
-        articles.forEach(article => {
-            const articleElement = createArticleElement(article);
-            container.appendChild(articleElement);
-        });
-    }
+    if (!container) return;
+    
+    container.innerHTML = articles.map(article => `
+        <article>
+            <h3><a href="${article.link}" target="_blank">${article.title}</a></h3>
+            <p>${article.excerpt}</p>
+            <div class="article-meta">
+                <span class="category">${article.category}</span>
+                <span class="date">${article.date.toLocaleDateString()}</span>
+            </div>
+        </article>
+    `).join('');
 }
 
-function createArticleElement(article) {
-    const articleElement = document.createElement('article');
-    articleElement.innerHTML = `
-        <h3>${article.title}</h3>
-        <p>${article.excerpt}</p>
-    `;
-    return articleElement;
-}
-
-function initTrendingTopics() {
-    const topics = [
-        { name: 'Trend 1', count: '10K' },
-        { name: 'Trend 2', count: '5K' }
-    ];
-
+function renderTrendingTopics(topics) {
     const container = document.getElementById('trending-topics-list');
-    if (container) {
-        topics.forEach(topic => {
-            const topicElement = createTopicElement(topic);
-            container.appendChild(topicElement);
-        });
-    }
-}
+    if (!container) return;
 
-function createTopicElement(topic) {
-    const topicElement = document.createElement('div');
-    topicElement.className = 'trending-topics-item';
-    topicElement.innerHTML = `
-        <span class="topic-name">${topic.name}</span>
-        <span class="topic-count">${topic.count}</span>
-    `;
-    return topicElement;
+    container.innerHTML = topics.map(topic => `
+        <div class="trending-topics-item">
+            <span class="topic-name">${topic.name}</span>
+            <span class="topic-count">${topic.count}</span>
+        </div>
+    `).join('');
 }
