@@ -9,12 +9,10 @@
 <body>
     <header class="header">
         <h1 class="logo">SPILL</h1>
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search articles..." class="search-input">
-        </div>
+        <input type="text" class="search-input" placeholder="Search articles...">
         <div class="weather">
-            <div class="temp">--°F</div>
-            <div class="time">7:52 AM</div>
+            <div>--°F</div>
+            <div>7:52 AM</div>
         </div>
     </header>
 
@@ -30,22 +28,14 @@
         </ul>
     </nav>
 
-    <div class="trending-ticker">
-        <div class="ticker-content">
-            <!-- Ticker items will be dynamically populated -->
-        </div>
-    </div>
+    <div class="ticker-content"></div>
 
     <main class="main-content">
-        <div class="article-grid" id="article-grid">
-            <!-- Articles will be dynamically populated -->
-        </div>
-
+        <div id="article-grid" class="article-grid"></div>
+        
         <aside class="trending-topics">
             <h2>Trending Topics</h2>
-            <div id="topics-list">
-                <!-- Topics will be dynamically populated -->
-            </div>
+            <div id="topics-list"></div>
         </aside>
     </main>
 

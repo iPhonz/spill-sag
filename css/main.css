@@ -1,4 +1,4 @@
-/* Reset and base styles */
+/* Base styles */
 * {
     margin: 0;
     padding: 0;
@@ -6,63 +6,48 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    line-height: 1.6;
-    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: #1a1d21;
+    color: #ffffff;
+    line-height: 1.6;
 }
 
-/* Header styles */
+/* Header */
 .header {
     padding: 1rem 2rem;
-    background: #1a1d21;
-    border-bottom: 1px solid #2a2e33;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: #1a1d21;
+    border-bottom: 1px solid #2a2e33;
 }
 
 .logo {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: #4e7bff;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.search-container {
-    flex-grow: 1;
-    margin: 0 2rem;
 }
 
 .search-input {
-    width: 100%;
+    flex-grow: 1;
+    margin: 0 2rem;
     padding: 0.75rem 1.25rem;
-    border: 1px solid #2a2e33;
     border-radius: 24px;
-    font-size: 1rem;
+    border: none;
     background: #2a2e33;
-    color: #fff;
+    color: #ffffff;
+    font-size: 1rem;
 }
 
 .weather {
+    text-align: right;
     font-size: 0.9rem;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-
-.time {
-    color: #666;
-    font-size: 0.8rem;
 }
 
 /* Navigation */
 .nav-menu {
+    padding: 1rem 2rem;
     background: #1a1d21;
-    padding: 0.5rem 2rem;
     border-bottom: 1px solid #2a2e33;
 }
 
@@ -73,51 +58,44 @@ body {
 }
 
 .nav-menu a {
-    color: #fff;
+    color: #ffffff;
     text-decoration: none;
     font-size: 0.9rem;
-    padding: 0.5rem 0;
+    opacity: 0.7;
+    transition: opacity 0.2s;
 }
 
+.nav-menu a:hover,
 .nav-menu a.active {
+    opacity: 1;
     color: #4e7bff;
 }
 
-/* Trending ticker */
-.trending-ticker {
-    background: #2a2e33;
+/* Ticker */
+.ticker-content {
     padding: 0.75rem 2rem;
+    background: #2a2e33;
     white-space: nowrap;
     overflow: hidden;
 }
 
-.ticker-content {
-    display: inline-flex;
-    gap: 2rem;
-    animation: ticker 30s linear infinite;
+@keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
 .ticker-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #fff;
+    display: inline-block;
+    margin-right: 2rem;
+    font-size: 0.9rem;
 }
 
 .ticker-count {
-    background: rgba(78, 123, 255, 0.2);
     color: #4e7bff;
-    padding: 0.15rem 0.5rem;
-    border-radius: 12px;
-    font-size: 0.8rem;
+    margin-left: 0.5rem;
 }
 
-@keyframes ticker {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-100%); }
-}
-
-/* Main content grid */
+/* Article Grid */
 .main-content {
     display: grid;
     grid-template-columns: 1fr 300px;
@@ -137,11 +115,26 @@ body {
     background: #2a2e33;
     border-radius: 12px;
     overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.article-card:hover {
+    transform: translateY(-2px);
+}
+
+.article-image-container {
+    width: 100%;
+    padding-top: 56.25%;
+    position: relative;
+    overflow: hidden;
 }
 
 .article-image {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 200px;
+    height: 100%;
     object-fit: cover;
 }
 
@@ -150,44 +143,37 @@ body {
 }
 
 .article-content h3 {
-    font-size: 1.1rem;
     margin-bottom: 0.5rem;
 }
 
 .article-content a {
-    color: #fff;
+    color: #ffffff;
     text-decoration: none;
 }
 
-/* Trending topics */
-.trending-topics {
-    background: #2a2e33;
-    border-radius: 12px;
-    padding: 1.5rem;
-}
-
-.trending-topics h2 {
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
-}
-
-.topic-item {
+.article-meta {
+    margin-top: 1rem;
     display: flex;
     justify-content: space-between;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #1a1d21;
-}
-
-.topic-name {
-    color: #fff;
-}
-
-.topic-meta {
-    color: #666;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    color: #999;
 }
 
 .category-tag {
-    color: #666;
-    font-size: 0.8rem;
+    background: rgba(78, 123, 255, 0.2);
+    color: #4e7bff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+}
+
+/* Loading and Error States */
+.loading,
+.error {
+    padding: 2rem;
+    text-align: center;
+    color: #999;
+}
+
+.error {
+    color: #ff4e4e;
 }
