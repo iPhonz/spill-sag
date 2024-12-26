@@ -3,35 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPILL</title>
+    <title>SPILL 🔥 TRENDING</title>
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
     <header class="header">
-        <h1 class="logo">SPILL</h1>
+        <h1 class="logo">SPILL 🔥 TRENDING</h1>
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search articles..." class="search-input">
         </div>
-        <div class="weather" id="weather">72°F</div>
+        <div class="weather">
+            <div class="temp">--°F</div>
+            <div class="time">7:52 AM</div>
+        </div>
     </header>
 
-    <main class="main-content">
-        <nav class="sidebar">
-            <ul class="nav-menu">
-                <li><a href="#latest">Latest News</a></li>
-                <li><a href="#popular">Popular</a></li>
-                <li><a href="#most-read">Most Read</a></li>
-            </ul>
-        </nav>
+    <nav class="nav-menu">
+        <ul>
+            <li><a href="#" class="active">All News</a></li>
+            <li><a href="#">Movies & TV</a></li>
+            <li><a href="#">Music</a></li>
+            <li><a href="#">Money</a></li>
+            <li><a href="#">Pop Culture</a></li>
+            <li><a href="#">Sports</a></li>
+            <li><a href="#">Technology & AI</a></li>
+        </ul>
+    </nav>
 
-        <section class="trending-section">
-            <h2>TRENDING</h2>
-            <div id="trending-articles" class="trending-articles"></div>
-        </section>
+    <div class="trending-ticker">
+        <div class="ticker-content">
+            <!-- Ticker items will be dynamically populated -->
+        </div>
+    </div>
+
+    <main class="main-content">
+        <div class="article-grid" id="article-grid">
+            <!-- Articles will be dynamically populated -->
+        </div>
 
         <aside class="trending-topics">
             <h2>Trending Topics</h2>
-            <div id="trending-topics-list" class="trending-topics-list"></div>
+            <div id="topics-list">
+                <!-- Topics will be dynamically populated -->
+            </div>
         </aside>
     </main>
 
