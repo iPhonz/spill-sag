@@ -4,34 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPILL</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <div class="app">
-        <h1>SPILL</h1>
-        
-        <input type="text" id="search" placeholder="Search articles...">
-        
-        <div id="weather">72°F</div>
-
-        <div class="layout">
-            <nav>
-                <a href="#">Latest News</a>
-                <a href="#">Popular</a>
-                <a href="#">Most Read</a>
-            </nav>
-
-            <main>
-                <h2>TRENDING</h2>
-                <div id="articles"></div>
-            </main>
-
-            <aside>
-                <h2>Trending Topics</h2>
-                <div id="trends"></div>
-            </aside>
+    <header class="header">
+        <h1 class="logo">SPILL</h1>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search articles..." class="search-input">
         </div>
-    </div>
-    <script src="app.js"></script>
+        <div class="weather" id="weather">72°F</div>
+    </header>
+
+    <main class="main-content">
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li><a href="#latest">Latest News</a></li>
+                <li><a href="#popular">Popular</a></li>
+                <li><a href="#most-read">Most Read</a></li>
+            </ul>
+        </nav>
+
+        <section class="trending-section">
+            <h2>TRENDING</h2>
+            <div id="trending-articles" class="trending-articles"></div>
+        </section>
+
+        <aside class="trending-topics">
+            <h2>Trending Topics</h2>
+            <div id="trending-topics-list" class="trending-topics-list"></div>
+        </aside>
+    </main>
+
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
