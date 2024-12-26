@@ -1,38 +1,30 @@
 class TrendingTicker {
     constructor() {
-        this.tickerTrack = document.getElementById('tickerTrack');
-        this.trends = [];
-        this.isInitialized = false;
+        this.tickerEl = document.getElementById('trendingTicker');
+        this.sidebarEl = document.getElementById('trendingTopics');
     }
 
-    updateTrends(trends) {
-        if (!this.tickerTrack) return;
-        this.trends = trends;
+    update(trends) {
+        if (this.tickerEl) {
+            this.tickerEl.innerHTML = trends.map(t => 
+                `<div class="trend-item">
+                    <span>${t.name}</span>
+                    <span class="count">(${t.count})</span>
+                    <span class="bullet">•</span>
+                </div>`
+            ).join('');
+        }
 
-        const tickerContent = trends.map(trend => `
-            <div class="ticker-item">
-                <span class="trend-text">${trend.phrase}</span>
-                <span class="trend-count">(${trend.count})</span>
-                <span class="trend-topics">${trend.topics.join(', ')}</span>
-            </div>
-        `).join('');
-
-        this.tickerTrack.innerHTML = tickerContent + tickerContent;
-
-        // Update trending sidebar
-        const trendingTopics = document.getElementById('trendingTopics');
-        if (trendingTopics) {
-            trendingTopics.innerHTML = trends.map(trend => `
-                <div class="trending-topic">
-                    <div class="topic-header">
-                        <span class="topic-name">${trend.phrase}</span>
+        if (this.sidebarEl) {
+            this.sidebarEl.innerHTML = trends.map(t =>
+                `<div class="trending-topic">
+                    <div class="topic-name">${t.name}</div>
+                    <div class="topic-meta">
+                        <span>${t.display}</span>
+                        <span class="topic-category">${t.topic}</span>
                     </div>
-                    <div class="topic-details">
-                        <span>${trend.displayCount}</span>
-                        <span class="topic-category">${trend.topics[0]}</span>
-                    </div>
-                </div>
-            `).join('');
+                </div>`
+            ).join('');
         }
     }
 }

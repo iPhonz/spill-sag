@@ -1,85 +1,85 @@
 class TrendAnalyzer {
     constructor() {
-        this.topicCategories = {
-            movies: ['film', 'movie', 'cinema', 'actor', 'actress', 'director'],
-            music: ['song', 'album', 'artist', 'band', 'singer', 'rapper'],
-            sports: ['team', 'player', 'game', 'match', 'tournament'],
-            technology: ['tech', 'ai', 'app', 'device', 'software'],
-            popculture: ['celebrity', 'star', 'trend', 'viral', 'social media']
+        this.topics = {
+            movies: ['movie', 'film', 'actor', 'actress', 'director', 'cinema', 'trailer', 'cast'],
+            popculture: ['celebrity', 'star', 'entertainment', 'viral', 'trend'],
+            technology: ['tech', 'ai', 'software', 'app', 'digital']
         };
-
-        this.stopWords = new Set([
-            'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have',
-            'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at'
-        ]);
     }
 
-    analyzeTrends(articles) {
+    analyze(articles) {
         const mentions = new Map();
-        const articlesByMention = new Map();
-        const topicsByMention = new Map();
+        const topicMap = new Map();
+        const cutoff = new Date();
+        cutoff.setHours(cutoff.getHours() - 24);
 
+        // Group by entity and count mentions
         articles.forEach(article => {
-            const text = `${article.title} ${article.description || ''}`;
-            const entities = this.extractEntities(text);
-            const topic = this.categorizeArticle(text);
+            if (new Date(article.date_published) < cutoff) return;
+            
+            const entities = this.extractEntities(article);
+            const topic = this.detectTopic(article);
 
             entities.forEach(entity => {
-                mentions.set(entity, (mentions.get(entity) || 0) + 1);
-                
-                if (!articlesByMention.has(entity)) {
-                    articlesByMention.set(entity, new Set());
-                    topicsByMention.set(entity, new Set());
+                if (!mentions.has(entity)) {
+                    mentions.set(entity, {
+                        count: 0,
+                        articles: new Set(),
+                        topics: new Set()
+                    });
                 }
-                
-                articlesByMention.get(entity).add(article);
-                topicsByMention.get(entity).add(topic);
+                const data = mentions.get(entity);
+                data.count++;
+                data.articles.add(article);
+                data.topics.add(topic);
             });
         });
 
+        // Convert to array and format
         return Array.from(mentions.entries())
-            .map(([entity, count]) => ({
-                phrase: entity,
-                count,
-                articles: Array.from(articlesByMention.get(entity)),
-                topics: Array.from(topicsByMention.get(entity)),
-                displayCount: `${count} mentions in ${topicsByMention.get(entity).size} topic`
+            .map(([entity, data]) => ({
+                name: entity,
+                count: data.count,
+                topic: Array.from(data.topics)[0],
+                display: `${data.count} mentions in ${data.topics.size} topic`,
+                articles: Array.from(data.articles)
             }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 10);
     }
 
-    extractEntities(text) {
-        const words = text.split(/\s+/);
+    extractEntities(article) {
         const entities = new Set();
-
-        // Extract proper nouns (capitalized words)
-        for (let i = 0; i < words.length; i++) {
-            if (/^[A-Z][a-zA-Z]*$/.test(words[i]) && !this.stopWords.has(words[i].toLowerCase())) {
-                let entity = words[i];
-                
-                // Check for multi-word proper nouns
-                while (i + 1 < words.length && /^[A-Z][a-zA-Z]*$/.test(words[i + 1])) {
-                    entity += ' ' + words[i + 1];
-                    i++;
-                }
-                
-                entities.add(entity);
+        const text = `${article.title} ${article.description || ''}`;
+        
+        // Match proper nouns
+        const properNouns = text.match(/[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*/g) || [];
+        properNouns.forEach(noun => {
+            if (noun.length > 1 && !this.isCommonWord(noun)) {
+                entities.add(noun);
             }
-        }
+        });
+
+        // Match quoted phrases
+        const quotes = text.match(/"([^"]+)"/g) || [];
+        quotes.forEach(quote => entities.add(quote.slice(1, -1)));
 
         return entities;
     }
 
-    categorizeArticle(text) {
-        const lowercaseText = text.toLowerCase();
+    detectTopic(article) {
+        const text = `${article.title} ${article.description || ''}`.toLowerCase();
         
-        for (const [category, keywords] of Object.entries(this.topicCategories)) {
-            if (keywords.some(keyword => lowercaseText.includes(keyword))) {
-                return category;
+        for (const [topic, keywords] of Object.entries(this.topics)) {
+            if (keywords.some(word => text.includes(word))) {
+                return topic;
             }
         }
-        
         return 'general';
+    }
+
+    isCommonWord(word) {
+        const common = ['The', 'This', 'That', 'These', 'Those', 'Here', 'There'];
+        return common.includes(word);
     }
 }
