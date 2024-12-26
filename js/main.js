@@ -1,10 +1,11 @@
-import { initWeather } from './weather.js';
+import { initNavigation } from './navigation.js';
 import { initTrending } from './trending.js';
-import { initSearch } from './search.js';
+import { initWeather } from './weather.js';
+import { initTicker } from './ticker.js';
 
-// Initialize all modules when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    initWeather();
+    initNavigation();
     initTrending();
-    initSearch();
+    initWeather();
+    initTicker();
 });
