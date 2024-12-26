@@ -1,101 +1,91 @@
 // Advanced trending analysis system
 class TrendAnalyzer {
     constructor() {
-        // Common words to filter out
         this.stopWords = new Set([
-            // Common articles, prepositions, etc.
             'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i',
             'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at',
-            // Common verbs and auxiliary words
             'is', 'are', 'was', 'were', 'been', 'being', 'have', 'has', 'had',
             'do', 'does', 'did', 'will', 'would', 'shall', 'should', 'may',
-            'might', 'must', 'can', 'could',
-            // Common adjectives and adverbs
-            'very', 'really', 'good', 'new', 'first', 'last', 'long', 'great',
-            'little', 'own', 'other', 'old', 'right', 'big', 'high', 'different',
-            // Common action words
-            'says', 'said', 'went', 'got', 'made', 'came', 'take', 'make',
-            'see', 'look', 'come', 'think', 'know',
-            // Time-related words
-            'now', 'today', 'tomorrow', 'yesterday', 'week', 'month', 'year',
-            'time', 'day', 'date', 'moment', 'after', 'before', 'early', 'late',
-            // Common conjunctions
-            'and', 'but', 'or', 'nor', 'for', 'yet', 'so',
-            // Other common words
-            'just', 'more', 'much', 'how', 'what', 'when', 'where', 'who',
-            'which', 'why', 'way', 'than', 'well', 'also', 'any', 'all'
+            'might', 'must', 'can', 'could'
         ]);
+
+        // Known entity patterns
+        this.entityPatterns = {
+            properNoun: /^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*$/,
+            hashtag: /#[A-Za-z]\w+/,
+            quotedPhrase: /"[^"]+"/,
+            technicalTerm: /^(?:AI|ML|API|SDK|UI|UX|iOS|AWS|GPU|CPU|NFT|DAO|DeFi|Web3)\b/i
+        };
 
         this.minimumWordLength = 3;
         this.minimumPhraseOccurrence = 2;
         this.maxPhraseLengthWords = 4;
+        this.recentTimeWeight = 1.5;
     }
 
-    // Extract meaningful phrases from text
     extractPhrases(text) {
-        const words = text.toLowerCase()
-            .replace(/[^\w\s]/g, ' ')
-            .split(/\s+/)
-            .filter(word => 
-                word.length >= this.minimumWordLength &&
-                !this.stopWords.has(word) &&
-                !/^\d+$/.test(word)
-            );
+        // Split into sentences for better context
+        const sentences = text.split(/[.!?]+/).filter(Boolean);
+        const phrases = new Map();
 
-        const phrases = [];
+        sentences.forEach(sentence => {
+            // Extract potential entities and phrases
+            this.extractEntitiesFromSentence(sentence, phrases);
+        });
+
+        return Array.from(phrases.keys());
+    }
+
+    extractEntitiesFromSentence(sentence, phrases) {
+        // Clean the sentence
+        const cleanSentence = sentence.trim();
         
-        // Single words (if significant)
-        words.forEach(word => {
-            if (this.isSignificantWord(word)) {
-                phrases.push(word);
+        // Extract quoted phrases
+        const quotedMatches = cleanSentence.match(/"([^"]+)"/g) || [];
+        quotedMatches.forEach(match => {
+            const phrase = match.slice(1, -1);
+            if (this.isSignificantPhrase(phrase)) {
+                phrases.set(phrase.toLowerCase(), true);
             }
         });
 
-        // Multi-word phrases
-        for (let i = 0; i < words.length; i++) {
-            for (let len = 2; len <= this.maxPhraseLengthWords && i + len <= words.length; len++) {
-                const phrase = words.slice(i, i + len).join(' ');
-                if (this.isSignificantPhrase(phrase)) {
-                    phrases.push(phrase);
-                }
+        // Extract proper nouns and technical terms
+        const words = cleanSentence.split(/\s+/);
+        let i = 0;
+        while (i < words.length) {
+            // Check for multi-word proper nouns
+            let j = i + 1;
+            let properNoun = words[i];
+            while (j < words.length && 
+                   words[j].charAt(0) === words[j].charAt(0).toUpperCase() && 
+                   !this.stopWords.has(words[j].toLowerCase())) {
+                properNoun += ' ' + words[j];
+                j++;
             }
+            
+            if (this.isSignificantPhrase(properNoun)) {
+                phrases.set(properNoun.toLowerCase(), true);
+            }
+            
+            i = j || i + 1;
         }
-
-        return phrases;
     }
 
-    // Determine if a single word is significant
-    isSignificantWord(word) {
-        // Check if it's a proper noun (capitalized in original text)
-        const isProperNoun = word.charAt(0) === word.charAt(0).toUpperCase();
-        
-        // Check if it's a technical term or known entity
-        const isTechnicalTerm = this.technicalTerms.has(word);
-        
-        return isProperNoun || isTechnicalTerm;
-    }
-
-    // Determine if a phrase is significant
     isSignificantPhrase(phrase) {
-        // Skip if all words are stop words
-        if (phrase.split(' ').every(word => this.stopWords.has(word))) {
-            return false;
-        }
-
-        // Check if it's a known entity or title
-        return this.knownEntities.some(entity => 
-            phrase.includes(entity.toLowerCase())
+        if (!phrase || phrase.length < this.minimumWordLength) return false;
+        
+        // Check against entity patterns
+        return Object.values(this.entityPatterns).some(pattern => 
+            pattern.test(phrase)
         );
     }
 
-    // Analyze trends from articles
     analyzeTrends(articles) {
-        const trendingPhrases = {};
-        const phraseArticles = {};
+        const trendingPhrases = new Map();
+        const phraseArticles = new Map();
         const cutoffTime = new Date();
         cutoffTime.setHours(cutoffTime.getHours() - 24);
 
-        // First pass: collect all phrases
         articles.forEach(article => {
             const pubDate = new Date(article.date_published);
             if (pubDate >= cutoffTime) {
@@ -103,20 +93,21 @@ class TrendAnalyzer {
                 const phrases = this.extractPhrases(text);
 
                 phrases.forEach(phrase => {
-                    trendingPhrases[phrase] = (trendingPhrases[phrase] || 0) + 1;
-                    if (!phraseArticles[phrase]) phraseArticles[phrase] = new Set();
-                    phraseArticles[phrase].add(article);
+                    trendingPhrases.set(phrase, (trendingPhrases.get(phrase) || 0) + 1);
+                    if (!phraseArticles.has(phrase)) phraseArticles.set(phrase, new Set());
+                    phraseArticles.get(phrase).add(article);
                 });
             }
         });
 
-        // Second pass: calculate trend scores
-        const trends = Object.entries(trendingPhrases)
+        // Calculate trend scores and sort
+        const trends = Array.from(trendingPhrases.entries())
             .map(([phrase, count]) => ({
                 phrase,
                 count,
-                articles: Array.from(phraseArticles[phrase]),
-                score: this.calculateTrendScore(count, phraseArticles[phrase].size)
+                articles: Array.from(phraseArticles.get(phrase)),
+                score: this.calculateTrendScore(count, phraseArticles.get(phrase), cutoffTime),
+                type: this.classifyTrendType(phrase)
             }))
             .filter(trend => trend.count >= this.minimumPhraseOccurrence)
             .sort((a, b) => b.score - a.score)
@@ -125,20 +116,33 @@ class TrendAnalyzer {
         return trends;
     }
 
-    // Calculate trend score based on multiple factors
-    calculateTrendScore(occurrences, uniqueArticles) {
-        const baseScore = occurrences * Math.log2(uniqueArticles + 1);
-        const recencyBonus = this.calculateRecencyBonus(uniqueArticles);
-        return baseScore * recencyBonus;
+    classifyTrendType(phrase) {
+        if (this.entityPatterns.properNoun.test(phrase)) return 'name';
+        if (this.entityPatterns.technicalTerm.test(phrase)) return 'tech';
+        if (this.entityPatterns.hashtag.test(phrase)) return 'topic';
+        if (this.entityPatterns.quotedPhrase.test(phrase)) return 'phrase';
+        return 'general';
     }
 
-    // Calculate bonus for recent articles
-    calculateRecencyBonus(articles) {
+    calculateTrendScore(occurrences, articles, cutoffTime) {
+        const baseScore = occurrences * Math.log2(articles.size + 1);
+        const recencyBonus = this.calculateRecencyBonus(articles, cutoffTime);
+        const diversityBonus = this.calculateDiversityBonus(articles);
+        
+        return baseScore * recencyBonus * diversityBonus;
+    }
+
+    calculateRecencyBonus(articles, cutoffTime) {
         const now = new Date();
-        const recencyScores = articles.map(article => {
+        const recencyScores = Array.from(articles).map(article => {
             const ageInHours = (now - new Date(article.date_published)) / (1000 * 60 * 60);
-            return Math.exp(-ageInHours / 24); // Exponential decay
+            return Math.exp(-ageInHours / 24) * this.recentTimeWeight;
         });
         return recencyScores.reduce((a, b) => a + b, 0) / recencyScores.length;
+    }
+
+    calculateDiversityBonus(articles) {
+        const uniqueSources = new Set(Array.from(articles).map(a => a.source)).size;
+        return 1 + Math.log2(uniqueSources + 1) / 2;
     }
 }
