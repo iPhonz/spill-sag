@@ -1,7 +1,65 @@
 import { RSS_FEEDS } from './config.js';
 
-export function initTrending() {
-    fetchAndDisplayArticles('all');
+class TrendAnalyzer {
+    constructor() {
+        this.stopWords = new Set([
+            'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i',
+            'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at',
+            'is', 'are', 'was', 'were', 'been', 'being', 'have', 'has', 'had',
+            'do', 'does', 'did', 'will', 'would', 'shall', 'should', 'may',
+            'might', 'must', 'can', 'could',
+            'very', 'really', 'good', 'new', 'first', 'last', 'long', 'great',
+            'little', 'own', 'other', 'old', 'right', 'big', 'high', 'different'
+        ]);
+
+        this.minimumWordLength = 3;
+        this.minimumOccurrence = 2;
+        this.maxPhraseLengthWords = 4;
+    }
+
+    extractPhrases(text) {
+        const words = text.toLowerCase()
+            .replace(/[^\w\s]/g, ' ')
+            .split(/\s+/)
+            .filter(word => 
+                word.length >= this.minimumWordLength &&
+                !this.stopWords.has(word) &&
+                !/^\d+$/.test(word)
+            );
+
+        const phrases = [];
+        words.forEach(word => phrases.push(word));
+
+        for (let i = 0; i < words.length; i++) {
+            for (let len = 2; len <= this.maxPhraseLengthWords && i + len <= words.length; len++) {
+                const phrase = words.slice(i, i + len).join(' ');
+                phrases.push(phrase);
+            }
+        }
+
+        return phrases;
+    }
+
+    calculateTrendScore(occurrences, uniqueArticles, articles) {
+        const baseScore = occurrences * Math.log2(uniqueArticles + 1);
+        const recencyBonus = this.calculateRecencyBonus(articles);
+        return baseScore * recencyBonus;
+    }
+
+    calculateRecencyBonus(articles) {
+        const now = new Date();
+        const recencyScores = articles.map(article => {
+            const ageInHours = (now - new Date(article.date_published)) / (1000 * 60 * 60);
+            return Math.exp(-ageInHours / 24);
+        });
+        return recencyScores.reduce((a, b) => a + b, 0) / recencyScores.length;
+    }
+}
+
+const analyzer = new TrendAnalyzer();
+
+export async function initTrending() {
+    await fetchAndDisplayArticles('all');
 }
 
 export async function fetchAndDisplayArticles(category) {
@@ -35,15 +93,14 @@ async function fetchArticles(category) {
                 image: item.image || item.thumbnail,
                 link: item.url,
                 category: item.category,
-                date: new Date(item.date_published)
+                date_published: item.date_published
             }));
         })
     );
 
-    return articles
-        .flat()
-        .sort((a, b) => b.date - a.date)
-        .slice(0, 12);
+    return articles.flat().sort((a, b) => 
+        new Date(b.date_published) - new Date(a.date_published)
+    ).slice(0, 12);
 }
 
 function renderArticles(articles, container) {
@@ -55,7 +112,7 @@ function renderArticles(articles, container) {
                 <p>${article.description || ''}</p>
                 <div class="article-meta">
                     <span class="category-tag">${article.category || ''}</span>
-                    <time>${article.date.toLocaleDateString()}</time>
+                    <time>${new Date(article.date_published).toLocaleDateString()}</time>
                 </div>
             </div>
         </article>
@@ -63,49 +120,53 @@ function renderArticles(articles, container) {
 }
 
 function updateTrendingTopics(articles) {
-    const topicsContainer = document.getElementById('topics-list');
-    if (!topicsContainer) return;
+    const trendingPhrases = {};
+    const phraseArticles = {};
+    const cutoffTime = new Date();
+    cutoffTime.setHours(cutoffTime.getHours() - 24);
 
-    const topics = aggregateTopics(articles);
-    
-    topicsContainer.innerHTML = topics.map(topic => `
+    articles.forEach(article => {
+        const pubDate = new Date(article.date_published);
+        if (pubDate >= cutoffTime) {
+            const text = `${article.title} ${article.description || ''}`;
+            const phrases = analyzer.extractPhrases(text);
+
+            phrases.forEach(phrase => {
+                trendingPhrases[phrase] = (trendingPhrases[phrase] || 0) + 1;
+                if (!phraseArticles[phrase]) phraseArticles[phrase] = new Set();
+                phraseArticles[phrase].add(article);
+            });
+        }
+    });
+
+    const trends = Object.entries(trendingPhrases)
+        .map(([phrase, count]) => ({
+            phrase,
+            count,
+            articles: Array.from(phraseArticles[phrase]),
+            score: analyzer.calculateTrendScore(
+                count,
+                phraseArticles[phrase].size,
+                Array.from(phraseArticles[phrase])
+            )
+        }))
+        .filter(trend => trend.count >= analyzer.minimumOccurrence)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10);
+
+    renderTrendingTopics(trends);
+}
+
+function renderTrendingTopics(trends) {
+    const container = document.getElementById('topics-list');
+    if (!container) return;
+
+    container.innerHTML = trends.map(trend => `
         <div class="topic-item">
-            <span class="topic-name">${topic.name}</span>
+            <span class="topic-name">${trend.phrase}</span>
             <div class="topic-meta">
-                <span>${topic.count} mentions in ${topic.categories.length} topics</span>
-                <span class="category-tag">${topic.categories[0]}</span>
+                <span>${trend.count} mentions in ${trend.articles.length} articles</span>
             </div>
         </div>
     `).join('');
-}
-
-function aggregateTopics(articles) {
-    const topics = {};
-    
-    articles.forEach(article => {
-        const words = article.title.split(' ');
-        words.forEach(word => {
-            if (word.length > 3) {
-                if (!topics[word]) {
-                    topics[word] = {
-                        name: word,
-                        count: 0,
-                        categories: new Set()
-                    };
-                }
-                topics[word].count++;
-                if (article.category) {
-                    topics[word].categories.add(article.category);
-                }
-            }
-        });
-    });
-
-    return Object.values(topics)
-        .map(topic => ({
-            ...topic,
-            categories: Array.from(topic.categories)
-        }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10);
 }
