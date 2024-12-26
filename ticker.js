@@ -3,19 +3,26 @@ class TrendingTicker {
         this.tickerTrack = document.getElementById('tickerTrack');
         this.trends = [];
         this.isInitialized = false;
+        this.animationSpeed = 50; // px per second
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        document.addEventListener('DOMContentLoaded', () => {
+            this.tickerTrack = document.getElementById('tickerTrack');
+            if (this.trends.length > 0) {
+                this.updateTrends(this.trends);
+            }
+        });
     }
 
     updateTrends(trends) {
         if (!this.tickerTrack) return;
         this.trends = trends;
 
-        // Create ticker items
         const tickerContent = trends.map(trend => this.createTickerItem(trend)).join('');
-
-        // Double the content for seamless loop
         this.tickerTrack.innerHTML = tickerContent + tickerContent;
 
-        // Initialize animation timing
         if (!this.isInitialized) {
             this.initializeAnimation();
             this.isInitialized = true;
@@ -25,70 +32,78 @@ class TrendingTicker {
     createTickerItem(trend) {
         const typeIcons = {
             name: '👤',
-            organization: '🏢',
-            brand: '™️',
-            team: '🏆',
-            entertainment: '🎭',
             tech: '💻',
-            phrase: '📰'
+            topic: '#️⃣',
+            phrase: '📰',
+            general: '📌'
         };
 
         const icon = typeIcons[trend.type] || '📌';
-        const topics = trend.topics.map(topic => 
-            `<span class="topic-badge">${topic}</span>`
-        ).join('');
+        const articleCount = trend.articles ? trend.articles.length : 0;
 
         return `
-            <a href="#" class="ticker-item" onclick="setSearch('${trend.entity}'); return false;">
-                <span>${icon}</span>
-                <span>${trend.entity}</span>
-                <span>(${trend.mentions})</span>
-                ${topics}
-            </a>
+            <div class="ticker-item" onclick="window.app.showTrendArticles('${encodeURIComponent(JSON.stringify(trend))}')">
+                <span class="ticker-icon">${icon}</span>
+                <span class="ticker-text">${trend.phrase}</span>
+                <span class="ticker-count">(${articleCount} articles)</span>
+            </div>
         `;
     }
 
     initializeAnimation() {
         if (!this.tickerTrack) return;
 
-        // Calculate animation duration based on content
         const totalWidth = this.tickerTrack.scrollWidth / 2;
-        const duration = totalWidth / 50; // 50px per second
+        const duration = totalWidth / this.animationSpeed;
 
-        // Update animation duration
         this.tickerTrack.style.animation = `ticker ${duration}s linear infinite`;
 
-        // Add event listener for automatic restart on animation end
         this.tickerTrack.addEventListener('animationend', () => {
-            this.tickerTrack.style.animation = 'none';
-            void this.tickerTrack.offsetWidth; // Trigger reflow
-            this.tickerTrack.style.animation = `ticker ${duration}s linear infinite`;
+            requestAnimationFrame(() => {
+                this.tickerTrack.style.animation = 'none';
+                this.tickerTrack.offsetHeight;
+                this.tickerTrack.style.animation = `ticker ${duration}s linear infinite`;
+            });
         });
     }
 
     adjustSpeed(factor = 1) {
         if (!this.tickerTrack || !this.isInitialized) return;
+        this.animationSpeed = 50 * factor;
+        this.initializeAnimation();
+    }
 
-        const currentDuration = parseFloat(this.tickerTrack.style.animation.match(/\d+(\.\d+)?/)[0]);
-        const newDuration = currentDuration * factor;
+    pause() {
+        if (this.tickerTrack) {
+            this.tickerTrack.style.animationPlayState = 'paused';
+        }
+    }
 
-        this.tickerTrack.style.animation = `ticker ${newDuration}s linear infinite`;
+    resume() {
+        if (this.tickerTrack) {
+            this.tickerTrack.style.animationPlayState = 'running';
+        }
     }
 }
 
-// Create global instance
 const trendingTicker = new TrendingTicker();
 
-// Update the ticker when trends change
-function updateTrending() {
-    const trends = trendAnalyzer.analyzeTrends(allArticles);
-    
-    // Update sidebar
-    const trendingContainer = document.getElementById('trendingContainer');
-    if (trendingContainer) {
-        // Previous trending sidebar update code...
+function updateTrending(articles) {
+    if (!window.trendAnalyzer) {
+        console.error('Trend analyzer not initialized');
+        return;
     }
 
-    // Update ticker
+    const trends = window.trendAnalyzer.analyzeTrends(articles);
     trendingTicker.updateTrends(trends);
+
+    const trendingContainer = document.getElementById('trendingTopics');
+    if (trendingContainer) {
+        trendingContainer.innerHTML = trends.map(trend => `
+            <div class="trending-topic" onclick="window.app.showTrendArticles('${encodeURIComponent(JSON.stringify(trend))}')">
+                <span class="trend-text">${trend.phrase}</span>
+                <span class="trend-count">${trend.articles.length} mentions</span>
+            </div>
+        `).join('');
+    }
 }
